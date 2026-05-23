@@ -5,18 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Contact — Shining Light Academy</title>
 <link rel="stylesheet" href="css/styles.css" />
-<link rel="icon" type="image/png" href="images/sla-logo.png" />
+<link rel="icon" type="image/svg+xml" href="images/sla-logo.svg" />
 </head>
 <body>
-
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
-      <img src="images/sla-logo.png" alt="SLA Logo" />
-      <span class="nav-brand-text">
-        <strong>Shining Light Academy</strong>
-        <small>SY 2026 – 2027</small>
-      </span>
+      <img src="images/sla-logo.svg" alt="" />
+      <span>Shining Light Academy</span>
     </a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
@@ -30,18 +26,15 @@
     <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
   </div>
 </nav>
-
 <header class="page-head">
-  <div class="container">
-    <span class="eyebrow" style="margin-bottom: 1rem;">Contact Us</span>
-    <h1>Send us a <em>word.</em></h1>
-    <p class="lede">
-      Questions about enrollment, partnerships, or anything in between — reach out through the form or any of the channels listed here.
-    </p>
+  <div class="container-narrow">
+    <span class="t-eyebrow">Contact</span>
+    <h1>Send us a <span class="accent">word.</span></h1>
+    <p class="lede">Questions about enrollment, partnerships, or anything else — reach out through the form or any of the channels listed here.</p>
   </div>
 </header>
 
-<section style="padding-top: 2rem;">
+<section>
   <div class="container">
     <div class="contact-grid">
 
@@ -66,7 +59,6 @@
 
       <div class="contact-form reveal">
         <h3 style="margin-bottom: 1.5rem;">Drop us a message.</h3>
-
         <div class="form-row cols-2">
           <div class="form-field"><label for="firstName">First Name</label><input id="firstName" type="text" placeholder="Juan" /></div>
           <div class="form-field"><label for="lastName">Last Name</label><input id="lastName" type="text" placeholder="dela Cruz" /></div>
@@ -80,14 +72,8 @@
         <div class="form-row">
           <div class="form-field"><label for="message">Your Message</label><textarea id="message" rows="5" placeholder="Tell us how we can help…"></textarea></div>
         </div>
-
-        <button type="button" class="btn btn-primary" id="sendBtn" style="width: 100%; justify-content: center;">
-          Send Message <span>→</span>
-        </button>
-
-        <p style="font-size: 0.78rem; color: var(--ink-mute); margin-top: 1rem; text-align: center;">
-          This opens your email app with the message prefilled, addressed to <strong>rongtangco0621@slasm.net</strong>.
-        </p>
+        <button type="button" class="btn btn-primary" id="sendBtn" style="width: 100%; justify-content: center;">Send Message</button>
+        <p style="font-size: 0.78rem; color: var(--text-mute); margin-top: 1rem; text-align: center;">This opens your email app with the message prefilled, addressed to <strong>rongtangco0621@slasm.net</strong>.</p>
       </div>
     </div>
   </div>
@@ -107,47 +93,51 @@ document.getElementById('sendBtn').addEventListener('click', () => {
   window.location.href = `mailto:rongtangco0621@slasm.net?subject=${sub}&body=${msg}`;
 });
 </script>
-
 <footer class="footer">
   <div class="container">
+    <div class="footer-top">
+      Shining Light Academy is a private Christian school serving Cagayan Valley since 2011. Information on this site is for the SLA community.
+    </div>
     <div class="footer-grid">
       <div>
-        <h5>Shining Light Academy</h5>
-        <p class="footer-brand-text">The school that stands to stand out.</p>
-        <p style="font-size: 0.9rem;">Centro 1, Zamora Street,<br />Sanchez-Mira, Cagayan Valley,<br />Philippines</p>
-      </div>
-      <div>
-        <h5>Explore</h5>
+        <h5>School</h5>
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="teachers.html">Teachers</a></li>
-          <li><a href="schedule.html">Schedule</a></li>
-          <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
         </ul>
       </div>
       <div>
-        <h5>Connect</h5>
+        <h5>Academics</h5>
         <ul>
+          <li><a href="schedule.html">Schedule</a></li>
           <li><a href="classrooms.html">Classrooms</a></li>
-          <li><a href="gallery.html">Gallery</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="portfolio.html">Portfolio</a></li>
         </ul>
       </div>
       <div>
         <h5>Reach Us</h5>
         <ul>
-          <li><a href="mailto:rongtangco0621@slasm.net">rongtangco0621@slasm.net</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mailto:sla@slasm.net">sla@slasm.net</a></li>
           <li><a href="https://www.facebook.com/ShiningLightAcademySM" target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Address</h5>
+        <ul>
+          <li>Centro 1, Zamora Street</li>
+          <li>Sanchez-Mira, Cagayan</li>
+          <li>Philippines</li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© <span id="current-year"></span> Shining Light Academy. All rights reserved.</span>
-      <span style="font-style: italic; font-family: var(--font-display);">Soli Deo Gloria.</span>
+      <span>Copyright © <span id="current-year"></span> Shining Light Academy. All rights reserved.</span>
+      <span>Soli Deo Gloria.</span>
     </div>
   </div>
 </footer>
-
 <script src="js/main.js"></script>
 </body>
 </html>

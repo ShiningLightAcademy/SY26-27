@@ -6,18 +6,15 @@
 <meta name="description" content="Shining Light Academy of Cagayan Valley, Inc. — We make your child's world better." />
 <title>Shining Light Academy of Cagayan Valley, Inc.</title>
 <link rel="stylesheet" href="css/styles.css" />
-<link rel="icon" type="image/png" href="images/sla-logo.png" />
+<link rel="icon" type="image/svg+xml" href="images/sla-logo.svg" />
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
-      <img src="images/sla-logo.png" alt="SLA Logo" />
-      <span class="nav-brand-text">
-        <strong>Shining Light Academy</strong>
-        <small>SY 2026 – 2027</small>
-      </span>
+      <img src="images/sla-logo.svg" alt="" />
+      <span>Shining Light Academy</span>
     </a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
@@ -32,36 +29,39 @@
   </div>
 </nav>
 
-<!-- HERO: Minimalist -->
-<header class="hero-min">
-  <img src="images/sla-logo.png" alt="Shining Light Academy Crest" class="hero-min-logo" />
-  <h1>Shining Light Academy<br /><em>of Cagayan Valley, Inc.</em></h1>
-  <p class="tagline">"We make your child's world better."</p>
-  <div class="deped">
-    <strong>DepEd Recognitions and Permits</strong>
-    K-063 s. 2020 · E-258 s. 2017 · J-08 s. 2020 · S-002 s. 2020
+<!-- HERO: Building image + Liquid Glass title pane -->
+<header class="hero">
+  <div class="hero-bg">
+    <img src="images/sla-building.png" alt="Shining Light Academy building" />
   </div>
-  <div class="scroll-cue">Scroll</div>
+  <div class="hero-glass">
+    <img src="images/sla-logo.svg" alt="SLA Crest" class="hero-logo" />
+    <h1 class="hero-title">Shining Light<br />Academy</h1>
+    <p class="hero-sub">of Cagayan Valley, Inc.</p>
+    <p class="hero-tagline">"We make your child's world better."</p>
+    <div class="hero-deped">
+      <strong>DepEd Recognitions and Permits</strong>
+      K-063 s. 2020 · E-258 s. 2017 · J-08 s. 2020 · S-002 s. 2020
+    </div>
+  </div>
 </header>
 
 <!-- VISION & MISSION -->
-<section>
+<section class="vm">
   <div class="container">
-    <div class="section-header reveal">
-      <span class="eyebrow">Our Foundation</span>
-      <h2>Two ideas hold up<br />everything we do.</h2>
+    <div class="section-head reveal">
+      <span class="t-eyebrow">Our Foundation</span>
+      <h2>Two ideas hold up<br /><span class="accent">everything we do.</span></h2>
     </div>
 
     <div class="vm-grid reveal">
       <div class="vm-card">
-        <div class="vm-num">01</div>
-        <span class="eyebrow" style="margin-bottom: 1rem;">Vision</span>
+        <div class="vm-num">01 — Vision</div>
         <h3>A leading school where learners become future leaders.</h3>
         <p>A leading school wherein learners are developed to fear God, and excel in academics and character — those who will become future leaders following Biblical principles that uplift the world.</p>
       </div>
       <div class="vm-card">
-        <div class="vm-num">02</div>
-        <span class="eyebrow" style="margin-bottom: 1rem;">Mission</span>
+        <div class="vm-num">02 — Mission</div>
         <h3>The heart of education is the education of the heart.</h3>
         <p>SLA trains and molds children to love and honor God and country, and to become socially responsible through high-quality, holistic education.</p>
       </div>
@@ -69,21 +69,19 @@
   </div>
 </section>
 
-<!-- CARD SHUFFLE CAROUSEL -->
+<!-- CARD SHUFFLE — moments at SLA -->
 <section class="shuffle-section">
   <div class="container">
     <div class="shuffle-grid">
-
       <div class="reveal">
-        <span class="eyebrow">Moments at SLA</span>
-        <h2 style="margin: 1rem 0 1.5rem;">A community<br />that <em class="serif-italic" style="color: var(--gold-light);">lights the way.</em></h2>
-        <p style="font-size: 1.05rem; line-height: 1.7; max-width: 48ch;">
+        <span class="t-eyebrow">Moments at SLA</span>
+        <h2 style="margin: 1rem 0 1.5rem;">A community<br />that lights the way.</h2>
+        <p style="font-size: 1.1rem; line-height: 1.55; max-width: 48ch;">
           Fourteen years of recognitions, championships, fellowships, and quiet ordinary days. SLA isn't just a school — it's a community of students, teachers, parents, and alumni walking the same path. Every photo tells a piece of the same story: that with God's grace, every SLAion finds their place to shine.
         </p>
-        <p style="font-size: 1.05rem; line-height: 1.7; max-width: 48ch; margin-top: 1rem;">
+        <p style="font-size: 1.1rem; line-height: 1.55; max-width: 48ch; margin-top: 1rem;">
           From Olympiad medals to outreach Sundays, sports days to graduation tears — this is what fourteen years of "making a difference" actually looks like.
         </p>
-
         <div class="shuffle-controls">
           <button class="shuffle-btn" data-shuffle-prev aria-label="Previous">←</button>
           <span class="shuffle-counter" data-shuffle-counter>01 / 05</span>
@@ -92,28 +90,12 @@
       </div>
 
       <div class="shuffle-stage" data-shuffle-stage>
-        <article class="shuffle-card">
-          <div class="placeholder">i</div>
-          <div class="shuffle-card-caption">Founding Anniversary · 2026</div>
-        </article>
-        <article class="shuffle-card">
-          <div class="placeholder">ii</div>
-          <div class="shuffle-card-caption">Mathematics Olympiad Champions</div>
-        </article>
-        <article class="shuffle-card">
-          <div class="placeholder">iii</div>
-          <div class="shuffle-card-caption">Recognition Day Honors</div>
-        </article>
-        <article class="shuffle-card">
-          <div class="placeholder">iv</div>
-          <div class="shuffle-card-caption">Sports Fest Champions</div>
-        </article>
-        <article class="shuffle-card">
-          <div class="placeholder">v</div>
-          <div class="shuffle-card-caption">Christmas Outreach Program</div>
-        </article>
+        <article class="shuffle-card"><div class="placeholder">i</div><div class="shuffle-card-caption">Founding Anniversary · 2026</div></article>
+        <article class="shuffle-card"><div class="placeholder">ii</div><div class="shuffle-card-caption">Mathematics Olympiad Champions</div></article>
+        <article class="shuffle-card"><div class="placeholder">iii</div><div class="shuffle-card-caption">Recognition Day Honors</div></article>
+        <article class="shuffle-card"><div class="placeholder">iv</div><div class="shuffle-card-caption">Sports Fest Champions</div></article>
+        <article class="shuffle-card"><div class="placeholder">v</div><div class="shuffle-card-caption">Christmas Outreach Program</div></article>
       </div>
-
     </div>
   </div>
 </section>
@@ -121,57 +103,52 @@
 <!-- PHYSICAL vs VIRTUAL -->
 <section>
   <div class="container">
-    <div class="section-header reveal" style="text-align: center; margin: 0 auto clamp(3rem, 6vw, 5rem);">
-      <span class="eyebrow" style="margin: 0 auto;">Learning Modalities</span>
-      <h2 style="margin: 0 auto;">The difference between<br /><em class="serif-italic">physical &amp; virtual.</em></h2>
+    <div class="section-head reveal">
+      <span class="t-eyebrow">Learning Modalities</span>
+      <h2>Physical or virtual.<br /><span class="accent">Built for both.</span></h2>
     </div>
 
-    <div class="pv-split reveal">
-      <div class="pv-card physical">
-        <span class="pv-eyebrow">Physical</span>
-        <h3>Face to Face</h3>
-        <p class="pv-aka">Also known as in-person or face-to-face classes.</p>
+    <div class="pv-grid reveal">
+      <div class="pv-tile dark">
+        <div>
+          <span class="pv-label">Physical</span>
+          <h3>Face to Face</h3>
+          <p class="pv-aka">Also known as in-person classes.</p>
+        </div>
         <ul>
           <li>Full Face-to-Face</li>
           <li>Local SLAions</li>
         </ul>
       </div>
-      <div class="pv-card virtual">
-        <span class="pv-eyebrow">Virtual</span>
-        <h3>Online</h3>
-        <p class="pv-aka">Also known as online classes.</p>
+      <div class="pv-tile light">
+        <div>
+          <span class="pv-label">Virtual</span>
+          <h3>Online</h3>
+          <p class="pv-aka">Also known as online classes.</p>
+        </div>
         <ul>
-          <li>Full Online (Synchronous / Asynchronous)</li>
+          <li>Full Online — Synchronous / Asynchronous</li>
           <li>International / Outstations</li>
         </ul>
       </div>
     </div>
 
-    <div class="pv-tools reveal">
-      <p style="color: var(--ink-soft); font-size: 1.05rem; max-width: 50ch; margin: 0 auto;">
+    <div class="reveal" style="text-align: center; margin-top: clamp(3rem, 6vw, 4rem);">
+      <p style="font-size: 1.15rem; color: var(--text-mute); max-width: 50ch; margin: 0 auto;">
         SLA offers blended learning modalities for all SLAions across the globe.
       </p>
-      <div class="pv-tools-grid">
-        <div class="pv-tool">
-          <div class="pv-tool-icon" style="background: #2D8CFF; color: white; border-radius: 12px;">Z</div>
-          <span class="pv-tool-label">Zoom</span>
-        </div>
-        <div class="pv-tool">
-          <div class="pv-tool-icon" style="background: #00897B; color: white; border-radius: 12px;">M</div>
-          <span class="pv-tool-label">Google Meet</span>
-        </div>
-        <div class="pv-tool">
-          <div class="pv-tool-icon" style="background: #1E8E3E; color: white; border-radius: 12px;">C</div>
-          <span class="pv-tool-label">Google Classroom</span>
-        </div>
+      <div class="tools-row">
+        <div class="tool-card"><div class="tool-icon zoom">Z</div><span class="tool-label">Zoom</span></div>
+        <div class="tool-card"><div class="tool-icon meet">M</div><span class="tool-label">Google Meet</span></div>
+        <div class="tool-card"><div class="tool-icon classroom">C</div><span class="tool-label">Google Classroom</span></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- QUOTE -->
-<section style="background: var(--paper); padding: clamp(4rem, 8vw, 7rem) 0;">
-  <div class="container">
+<section class="bg-light">
+  <div class="container-narrow">
     <div class="quote-block reveal">
       <blockquote>
         Trust in the Lord with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge Him, and He shall direct thy paths.
@@ -184,27 +161,15 @@
 <!-- STATS -->
 <section>
   <div class="container">
-    <div class="section-header reveal">
-      <span class="eyebrow">By the Numbers</span>
-      <h2>Fourteen years<br />of <em class="serif-italic">making a difference.</em></h2>
+    <div class="section-head reveal">
+      <span class="t-eyebrow">By the Numbers</span>
+      <h2>Fourteen years.<br /><span class="accent">Countless lives.</span></h2>
     </div>
     <div class="stats reveal">
-      <div class="stat">
-        <div class="stat-num">14<em>+</em></div>
-        <div class="stat-label">Years Shining</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">#1</div>
-        <div class="stat-label">In Region 2</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">100<em>%</em></div>
-        <div class="stat-label">Holistic Approach</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">∞</div>
-        <div class="stat-label">By God's Grace</div>
-      </div>
+      <div class="stat"><div class="stat-num">14<em>+</em></div><div class="stat-label">Years Shining</div></div>
+      <div class="stat"><div class="stat-num">#1</div><div class="stat-label">In Region 2</div></div>
+      <div class="stat"><div class="stat-num">100<em>%</em></div><div class="stat-label">Holistic Approach</div></div>
+      <div class="stat"><div class="stat-num">∞</div><div class="stat-label">By God's Grace</div></div>
     </div>
   </div>
 </section>
@@ -212,40 +177,46 @@
 <!-- FOOTER -->
 <footer class="footer">
   <div class="container">
+    <div class="footer-top">
+      Shining Light Academy is a private Christian school serving Cagayan Valley since 2011. Information on this site is for the SLA community.
+    </div>
     <div class="footer-grid">
       <div>
-        <h5>Shining Light Academy</h5>
-        <p class="footer-brand-text">The school that stands to stand out.</p>
-        <p style="font-size: 0.9rem;">Centro 1, Zamora Street,<br />Sanchez-Mira, Cagayan Valley,<br />Philippines</p>
-      </div>
-      <div>
-        <h5>Explore</h5>
+        <h5>School</h5>
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="teachers.html">Teachers</a></li>
-          <li><a href="schedule.html">Schedule</a></li>
-          <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
         </ul>
       </div>
       <div>
-        <h5>Connect</h5>
+        <h5>Academics</h5>
         <ul>
+          <li><a href="schedule.html">Schedule</a></li>
           <li><a href="classrooms.html">Classrooms</a></li>
-          <li><a href="gallery.html">Gallery</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="portfolio.html">Portfolio</a></li>
         </ul>
       </div>
       <div>
         <h5>Reach Us</h5>
         <ul>
+          <li><a href="contact.html">Contact</a></li>
           <li><a href="mailto:sla@slasm.net">sla@slasm.net</a></li>
           <li><a href="https://www.facebook.com/ShiningLightAcademySM" target="_blank" rel="noopener">Facebook</a></li>
         </ul>
       </div>
+      <div>
+        <h5>Address</h5>
+        <ul>
+          <li>Centro 1, Zamora Street</li>
+          <li>Sanchez-Mira, Cagayan</li>
+          <li>Philippines</li>
+        </ul>
+      </div>
     </div>
     <div class="footer-bottom">
-      <span>© <span id="current-year"></span> Shining Light Academy. All rights reserved.</span>
-      <span style="font-style: italic; font-family: var(--font-display);">Soli Deo Gloria.</span>
+      <span>Copyright © <span id="current-year"></span> Shining Light Academy. All rights reserved.</span>
+      <span>Soli Deo Gloria.</span>
     </div>
   </div>
 </footer>
