@@ -156,3 +156,90 @@
   const y = document.getElementById('current-year');
   if (y) y.textContent = new Date().getFullYear();
 })();
+
+// ============================================================
+// SCROLL PROGRESS BAR — visible scroll indicator
+// ============================================================
+(function () {
+  const bar = document.createElement('div');
+  bar.className = 'scroll-bar';
+  bar.innerHTML = '<div class="scroll-bar-fill"></div>';
+  document.body.appendChild(bar);
+
+  const fill = bar.querySelector('.scroll-bar-fill');
+  let ticking = false;
+  const update = () => {
+    const scrolled = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const percent = Math.min(100, Math.max(0, (scrolled / maxScroll) * 100));
+    fill.style.width = percent + '%';
+
+    // Also set the CSS var for page-head progress bar
+    const pageHead = document.querySelector('.page-head');
+    if (pageHead) {
+      const rect = pageHead.getBoundingClientRect();
+      const visible = Math.min(1, Math.max(0, 1 - rect.bottom / window.innerHeight));
+      pageHead.style.setProperty('--scroll-progress', visible);
+    }
+    ticking = false;
+  };
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+})();
+
+// ============================================================
+// SPLIT TEXT — letter-by-letter reveal for big titles
+// ============================================================
+(function () {
+  document.querySelectorAll('.split-text').forEach(el => {
+    if (el.dataset.splitDone) return;
+    const text = el.textContent.trim();
+    const words = text.split(' ');
+    el.innerHTML = words.map(w => `<span class="word"><span>${w}</span></span>`).join(' ');
+    el.dataset.splitDone = '1';
+  });
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.split-text').forEach(el => obs.observe(el));
+  } else {
+    document.querySelectorAll('.split-text').forEach(el => el.classList.add('in'));
+  }
+})();
+
+// ============================================================
+// PORTFOLIO ACCORDION — toggle each grade
+// ============================================================
+(function () {
+  document.querySelectorAll('.portfolio-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const item = header.closest('.portfolio-item');
+      if (item) item.classList.toggle('open');
+    });
+  });
+})();
+
+// ============================================================
+// SUB-PAGE SCROLL EFFECTS — gentle scale on cards as they enter
+// ============================================================
+(function () {
+  if (!('IntersectionObserver' in window)) return;
+  const cards = document.querySelectorAll('.level-block, .teacher-card, .gallery-set, .portfolio-item');
+  if (cards.length === 0) return;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+  cards.forEach(c => obs.observe(c));
+})();
