@@ -159,31 +159,49 @@
 })();
 
 // ============================================================
-// SCROLL PROGRESS BAR — visible scroll indicator
+// SECTION INDICATOR — chapter dots on right side
 // ============================================================
 (function () {
-  const bar = document.createElement('div');
-  bar.className = 'scroll-bar';
-  bar.innerHTML = '<div class="scroll-bar-fill"></div>';
-  document.body.appendChild(bar);
+  const sections = document.querySelectorAll('main > section, body > section, .hero, .page-head');
+  if (sections.length < 2) return;
 
-  const fill = bar.querySelector('.scroll-bar-fill');
+  const indicator = document.createElement('nav');
+  indicator.className = 'section-indicator';
+  indicator.setAttribute('aria-label', 'Page sections');
+
+  sections.forEach((section, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'section-indicator-dot';
+    dot.setAttribute('aria-label', `Section ${i + 1}`);
+    dot.dataset.idx = i;
+    dot.addEventListener('click', () => {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    indicator.appendChild(dot);
+  });
+
+  document.body.appendChild(indicator);
+
+  const dots = Array.from(indicator.querySelectorAll('.section-indicator-dot'));
+
   let ticking = false;
   const update = () => {
-    const scrolled = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const percent = Math.min(100, Math.max(0, (scrolled / maxScroll) * 100));
-    fill.style.width = percent + '%';
+    const viewportMiddle = window.scrollY + window.innerHeight * 0.4;
+    let activeIdx = 0;
+    sections.forEach((section, i) => {
+      const top = section.offsetTop;
+      if (top <= viewportMiddle) activeIdx = i;
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === activeIdx));
 
-    // Also set the CSS var for page-head progress bar
-    const pageHead = document.querySelector('.page-head');
-    if (pageHead) {
-      const rect = pageHead.getBoundingClientRect();
-      const visible = Math.min(1, Math.max(0, 1 - rect.bottom / window.innerHeight));
-      pageHead.style.setProperty('--scroll-progress', visible);
-    }
+    // Show/hide based on scroll position — hide near top and bottom
+    const scrollPct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+    if (scrollPct < 0.02) indicator.classList.remove('visible');
+    else indicator.classList.add('visible');
+
     ticking = false;
   };
+
   window.addEventListener('scroll', () => {
     if (!ticking) { requestAnimationFrame(update); ticking = true; }
   }, { passive: true });
@@ -243,4 +261,40 @@
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
   cards.forEach(c => obs.observe(c));
+})();
+
+// ============================================================
+// COLLAGE CELL CAROUSELS — each photo cell auto-rotates + nav
+// ============================================================
+(function () {
+  document.querySelectorAll('.collage-cell-carousel').forEach(carousel => {
+    const track = carousel.querySelector('.collage-cell-track');
+    if (!track) return;
+    const slides = Array.from(track.children);
+    if (slides.length <= 1) return;
+    const dots = Array.from(carousel.querySelectorAll('.collage-cell-dot'));
+    const prevBtn = carousel.querySelector('.collage-cell-nav.prev');
+    const nextBtn = carousel.querySelector('.collage-cell-nav.next');
+    let current = 0;
+
+    function goTo(i) {
+      current = (i + slides.length) % slides.length;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, di) => d.classList.toggle('active', di === current));
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(current - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(current + 1); });
+    dots.forEach((d, di) => d.addEventListener('click', (e) => { e.stopPropagation(); goTo(di); }));
+
+    // Slow auto-advance, staggered slightly per cell so they don't all sync
+    const delay = 4500 + Math.random() * 2500;
+    let timer = setInterval(() => goTo(current + 1), delay);
+    const cell = carousel.closest('.collage-cell');
+    if (cell) {
+      cell.addEventListener('mouseenter', () => clearInterval(timer));
+      cell.addEventListener('mouseleave', () => { timer = setInterval(() => goTo(current + 1), delay); });
+    }
+    goTo(0);
+  });
 })();
