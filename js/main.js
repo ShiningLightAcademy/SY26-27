@@ -30,8 +30,9 @@
 // SCROLL REVEAL
 // ============================================================
 (function () {
+  const REVEAL_SELECTOR = '.reveal, .reveal-stagger, .reveal-up, .reveal-left, .reveal-right, .reveal-scale';
   if (!('IntersectionObserver' in window)) {
-    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('in'));
+    document.querySelectorAll(REVEAL_SELECTOR).forEach(el => el.classList.add('in'));
     return;
   }
   const observer = new IntersectionObserver((entries) => {
@@ -42,7 +43,7 @@
       }
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
-  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+  document.querySelectorAll(REVEAL_SELECTOR).forEach(el => observer.observe(el));
 })();
 
 // ============================================================
