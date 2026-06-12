@@ -118,23 +118,55 @@
   async function loadDashboard() {
     const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
     try {
-      const [users, msgs, teachers, anns, recent] = await Promise.all([
-        window.sla.db.from('profiles').select('id', { count:'exact', head:true }).gte('last_seen_at', sevenDaysAgo),
+      // Active users count and recent activity are main-admin-only
+      const isMainAdmin = !!profile.is_main_admin;
+
+      const queries = [
+        // Always fetch for all admins:
         window.sla.db.from('contact_messages').select('id', { count:'exact', head:true }).eq('is_read', false),
         window.sla.db.from('teachers').select('id', { count:'exact', head:true }),
         window.sla.db.from('announcements').select('id', { count:'exact', head:true }).eq('is_active', true),
-        window.sla.db.from('profiles').select('email, full_name, last_seen_at, role, is_main_admin').order('last_seen_at', { ascending:false, nullsFirst:false }).limit(8),
+      ];
+
+      // Main-admin-only queries
+      const usersQuery = isMainAdmin
+        ? window.sla.db.from('profiles').select('id', { count:'exact', head:true }).gte('last_seen_at', sevenDaysAgo)
+        : Promise.resolve({ count: null });
+      const recentQuery = isMainAdmin
+        ? window.sla.db.from('profiles').select('email, full_name, last_seen_at, role, is_main_admin').order('last_seen_at', { ascending:false, nullsFirst:false }).limit(8)
+        : Promise.resolve({ data: null });
+
+      const [msgs, teachers, anns, users, recent] = await Promise.all([
+        ...queries, usersQuery, recentQuery,
       ]);
-      document.getElementById('stat-users').textContent        = users.count ?? '0';
-      document.getElementById('stat-messages').textContent     = msgs.count ?? '0';
-      document.getElementById('stat-teachers').textContent     = teachers.count ?? '0';
-      document.getElementById('stat-announcements').textContent= anns.count ?? '0';
+
+      // Active users stat — only show to main admin
+      const statUsersEl = document.getElementById('stat-users');
+      const statUsersCard = statUsersEl ? statUsersEl.closest('.admin-stat') : null;
+      if (isMainAdmin) {
+        statUsersEl.textContent = users.count ?? '0';
+        if (statUsersCard) statUsersCard.hidden = false;
+      } else {
+        if (statUsersCard) statUsersCard.hidden = true;
+      }
+
+      document.getElementById('stat-messages').textContent      = msgs.count ?? '0';
+      document.getElementById('stat-teachers').textContent      = teachers.count ?? '0';
+      document.getElementById('stat-announcements').textContent = anns.count ?? '0';
 
       const badge = document.getElementById('unread-count');
       if (msgs.count && msgs.count > 0) { badge.textContent = msgs.count; badge.hidden = false; }
       else badge.hidden = true;
 
+      // Recent activity — main admin only
       const recentEl = document.getElementById('recent-activity');
+      const recentCard = recentEl ? recentEl.closest('.admin-card') : null;
+      if (!isMainAdmin) {
+        if (recentCard) recentCard.hidden = true;
+        return;
+      }
+      if (recentCard) recentCard.hidden = false;
+
       const list = recent.data || [];
       if (!list.length) { recentEl.innerHTML = '<div class="admin-empty">No activity yet.</div>'; return; }
       recentEl.innerHTML = list.map(u => {
