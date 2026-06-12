@@ -531,3 +531,66 @@
     });
   }
 })();
+
+// ============================================================
+// CARNIVAL THEME — Pennant bunting + confetti burst
+// Bunting appears on every page. Confetti fires only on homepage
+// after intro, once per session.
+// ============================================================
+(function () {
+  const path = window.location.pathname;
+  if (path.endsWith('/admin.html') || path.endsWith('/login.html')) return;
+
+  // Inject bunting at the top of body
+  function injectBunting() {
+    if (document.querySelector('.carnival-bunting')) return;
+    const bunting = document.createElement('div');
+    bunting.className = 'carnival-bunting';
+    bunting.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(bunting, document.body.firstChild);
+  }
+
+  if (document.body) injectBunting();
+  else document.addEventListener('DOMContentLoaded', injectBunting, { once: true });
+
+  // Confetti burst — only on homepage, only once per session
+  const isHome = path === '/' || path.endsWith('/index.html') || path.endsWith('/SY26-27/') || path.endsWith('/SY26-27');
+  if (!isHome) return;
+  if (sessionStorage.getItem('sla-confetti-shown')) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  sessionStorage.setItem('sla-confetti-shown', '1');
+
+  function burstConfetti() {
+    const container = document.createElement('div');
+    container.className = 'carnival-confetti';
+    document.body.appendChild(container);
+
+    const colors = [
+      'var(--gold)',           // gold
+      'var(--navy)',           // royal blue
+      '#FFD56B',               // light gold
+      '#1a3a8a',               // mid blue
+      '#FFFFFF',               // white sparkle
+    ];
+    const COUNT = 80;
+    for (let i = 0; i < COUNT; i++) {
+      const p = document.createElement('div');
+      p.className = 'carnival-confetti-piece';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--dur', (3 + Math.random() * 2.5) + 's');
+      p.style.setProperty('--delay', (Math.random() * 0.6) + 's');
+      p.style.width = (5 + Math.random() * 7) + 'px';
+      p.style.height = (8 + Math.random() * 8) + 'px';
+      container.appendChild(p);
+    }
+
+    // Clean up after the animation
+    setTimeout(() => container.remove(), 6500);
+  }
+
+  // Fire after intro completes (~2.4s) or right away if intro is done
+  const delay = sessionStorage.getItem('sla-intro-shown') === '1' ? 2700 : 500;
+  setTimeout(burstConfetti, delay);
+})();

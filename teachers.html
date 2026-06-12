@@ -110,7 +110,18 @@
     const content = isLink
       ? `<a href="${esc(isLink === 'mail' ? 'mailto:' + value : value)}"${isLink === 'url' ? ' target="_blank" rel="noopener"' : ''}>${esc(value)}</a>`
       : `<span>${esc(value)}</span>`;
-    return `<div class="row"><span class="label">${esc(label)}</span>${content}</div>`;
+    // Real brand logos as inline SVG
+    const logos = {
+      'WhatsApp': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>',
+      'TM/Smart': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#001d3d" d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 19c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm5-3H7V5h10v13z"/></svg>',
+      'Globe': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#0072BC" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+      'Email': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#EA4335" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
+      'Zoom Link': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#2D8CFF" d="M2 6.5C2 5.67 2.67 5 3.5 5h12c.83 0 1.5.67 1.5 1.5V11l4-3v8l-4-3v4.5c0 .83-.67 1.5-1.5 1.5h-12c-.83 0-1.5-.67-1.5-1.5v-11z"/></svg>',
+      'Meeting ID': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#00897B" d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>',
+      'Passcode': '<svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px;"><path fill="#5F6368" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>',
+    };
+    const logo = logos[label] || '';
+    return `<div class="row"><span class="label">${logo}${esc(label)}</span>${content}</div>`;
   }
 
   const grid = document.getElementById('teachers-grid');
@@ -130,11 +141,11 @@
     grid.innerHTML = data.map(t => {
       const initial = (t.full_name || '?').charAt(0).toUpperCase();
       const photo = t.photo_url
-        ? `<img src="${esc(t.photo_url)}" alt="${esc(t.full_name)}" loading="eager" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'teacher-photo-placeholder', textContent: '${initial}'}))" style="width:100%;height:100%;object-fit:cover;" />`
+        ? `<img src="${esc(t.photo_url)}" alt="${esc(t.full_name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'teacher-photo-placeholder', textContent: '${initial}'}))" style="width:100%;height:100%;object-fit:cover;" />`
         : `<div class="teacher-photo-placeholder">${esc(initial)}</div>`;
       const hasDetails = t.whatsapp || t.tm_smart || t.globe || t.email || t.zoom_link || t.meeting_id || t.passcode;
       return `
-        <article class="teacher-card reveal-up">
+        <article class="teacher-card revealed">
           <div class="teacher-photo">${photo}</div>
           <div class="teacher-body">
             <div class="teacher-name">${esc(t.full_name)}</div>
@@ -166,20 +177,7 @@
       });
     });
 
-    // Re-run reveal observer on new cards
-    if (window.IntersectionObserver) {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in');
-            io.unobserve(e.target);
-          }
-        });
-      }, { rootMargin: '0px 0px -10% 0px' });
-      grid.querySelectorAll('.reveal-up').forEach(el => io.observe(el));
-    } else {
-      grid.querySelectorAll('.reveal-up').forEach(el => el.classList.add('in'));
-    }
+    // (Cards rendered already-revealed for instant visibility)
   } catch (e) {
     console.warn('[teachers] failed to load:', e);
     grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-mute);">Could not load teachers. Please refresh.</div>`;

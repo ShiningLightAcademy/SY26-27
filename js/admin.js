@@ -107,7 +107,7 @@
   const PORTFOLIO_GRADES = [
     'Nursery','Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4',
     'Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10',
-    'Grade 11 STEM','Grade 11 HUMSS','Grade 12 STEM','Grade 12 HUMSS'
+    'Grade 11 Academic Track','Grade 11 TVL','Grade 12 STEM','Grade 12 HUMSS'
   ];
 
   // ============================================================
@@ -368,10 +368,9 @@
       <div class="admin-grade-group">
         <h4>${escapeHtml(LEVEL_LABELS[key] || key)}</h4>
         <div class="admin-grade-rows">
-          ${rows.map(r => `<div class="admin-grade-row admin-grade-row-wide" data-id="${r.id}">
+          ${rows.map(r => `<div class="admin-grade-row" data-id="${r.id}">
             <span class="admin-grade-name">${escapeHtml(r.grade_level)}</span>
-            <input type="url" class="admin-grade-url" placeholder="https://classroom.google.com/c/…" value="${escapeHtml(r.classroom_url || '')}" />
-            <input type="text" class="admin-grade-code" placeholder="Code" value="${escapeHtml(r.classroom_code || '')}" />
+            <input type="url" class="admin-grade-url" placeholder="https://drive.google.com/…" value="${escapeHtml(r.classroom_url || '')}" />
             <button class="admin-grade-save">Save</button>
             <span class="admin-grade-feedback"></span>
           </div>`).join('')}
@@ -383,7 +382,7 @@
         const row = btn.closest('.admin-grade-row');
         const fb = row.querySelector('.admin-grade-feedback');
         fb.textContent = 'Saving…'; fb.className = 'admin-grade-feedback';
-        const { error } = await window.sla.db.from('classroom_links').update({ classroom_url: row.querySelector('.admin-grade-url').value.trim() || null, classroom_code: row.querySelector('.admin-grade-code').value.trim() || null, updated_at: new Date().toISOString() }).eq('id', row.dataset.id);
+        const { error } = await window.sla.db.from('classroom_links').update({ classroom_url: row.querySelector('.admin-grade-url').value.trim() || null, classroom_code: null, updated_at: new Date().toISOString() }).eq('id', row.dataset.id);
         if (error) { fb.textContent = '✗ ' + error.message; fb.classList.add('error'); }
         else { fb.textContent = '✓ Saved'; fb.classList.add('success'); setTimeout(() => { fb.textContent = ''; fb.className = 'admin-grade-feedback'; }, 2000); }
       });
@@ -473,15 +472,100 @@
       grid.innerHTML = data.map(t => {
         const initial = (t.full_name || '?').charAt(0).toUpperCase();
         const photoHtml = t.photo_url ? `<img src="${escapeHtml(t.photo_url)}" alt="" loading="lazy" />` : `<span>${escapeHtml(initial)}</span>`;
-        return `<div class="teacher-admin-card ${t.is_visible ? '' : 'hidden-teacher'}" data-id="${t.id}">
+        return `<div class="teacher-admin-card ${t.is_visible ? '' : 'hidden-teacher'}" data-id="${t.id}" draggable="true">
+          <div class="teacher-drag-handle" title="Drag to reorder">⋮⋮</div>
           <div class="teacher-admin-photo">${photoHtml}</div>
           <div class="teacher-admin-info"><strong>${escapeHtml(t.full_name)}</strong><div class="meta">${escapeHtml(t.role || 'No role set')}</div></div>
         </div>`;
       }).join('');
-      grid.querySelectorAll('.teacher-admin-card').forEach(card => card.addEventListener('click', () => openTeacherModal(card.dataset.id)));
+
+      // Click → edit modal (ignore clicks on the drag handle)
+      grid.querySelectorAll('.teacher-admin-card').forEach(card => {
+        card.addEventListener('click', e => {
+          if (e.target.classList.contains('teacher-drag-handle')) return;
+          openTeacherModal(card.dataset.id);
+        });
+      });
+
+      wireTeacherDragDrop(grid);
     } catch (e) {
       console.error('[teachers]', e);
       grid.innerHTML = `<div class="admin-empty" style="color:#DC2626;">Unexpected error: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  // ---- DRAG TO REORDER ----
+  function wireTeacherDragDrop(grid) {
+    let draggedCard = null;
+
+    grid.querySelectorAll('.teacher-admin-card').forEach(card => {
+      card.addEventListener('dragstart', e => {
+        draggedCard = card;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        // Firefox needs data set or drag won't start
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        grid.querySelectorAll('.teacher-admin-card').forEach(c => c.classList.remove('drop-target'));
+        draggedCard = null;
+      });
+
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (card === draggedCard) return;
+        card.classList.add('drop-target');
+      });
+
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drop-target');
+      });
+
+      card.addEventListener('drop', async e => {
+        e.preventDefault();
+        card.classList.remove('drop-target');
+        if (!draggedCard || draggedCard === card) return;
+
+        // Reorder in DOM: place draggedCard before this card
+        const draggedRect = draggedCard.getBoundingClientRect();
+        const targetRect = card.getBoundingClientRect();
+        // Decide before or after based on cursor position
+        const dropAfter = (e.clientY - targetRect.top) > (targetRect.height / 2)
+                       || (e.clientX - targetRect.left) > (targetRect.width / 2);
+        if (dropAfter) card.parentNode.insertBefore(draggedCard, card.nextSibling);
+        else card.parentNode.insertBefore(draggedCard, card);
+
+        // Persist new order
+        await persistTeacherOrder(grid);
+      });
+    });
+  }
+
+  async function persistTeacherOrder(grid) {
+    const cards = grid.querySelectorAll('.teacher-admin-card');
+    const updates = [];
+    cards.forEach((card, idx) => {
+      updates.push({ id: card.dataset.id, sort_order: idx });
+    });
+    // Batch-update each teacher's sort_order. (Supabase upsert with onConflict
+    // could do it in one round-trip, but plain updates are safer with RLS.)
+    try {
+      await Promise.all(updates.map(u =>
+        window.sla.db.from('teachers').update({ sort_order: u.sort_order }).eq('id', u.id)
+      ));
+      // Show a transient indicator
+      const toast = document.createElement('div');
+      toast.textContent = '✓ Order saved';
+      toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;background:#1E8E3E;color:white;padding:.65rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:500;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);animation:fadeInOut 2.5s ease forwards;';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    } catch (e) {
+      console.error('[reorder]', e);
+      alert('Failed to save order: ' + e.message);
+      loadTeachers(); // refresh to true server state
     }
   }
 

@@ -63,7 +63,7 @@
     </div>
     <div class="level-block dark reveal-up">
       <div class="level-title">Senior High</div>
-      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 11 STEM">Grade 11 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 11 HUMSS">Grade 11 HUMSS</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 12 STEM">Grade 12 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 12 HUMSS">Grade 12 HUMSS</a></div>
+      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 11 Academic Track">Grade 11 Academic Track</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 11 TVL">Grade 11 TVL</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 12 STEM">Grade 12 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 12 HUMSS">Grade 12 HUMSS</a></div>
     </div>
     <p class="note">Each button is a placeholder. Replace each href="#" with the actual Google Classroom enrollment link.</p>
   </div>
@@ -127,9 +127,7 @@
       const row = byGrade[btn.dataset.gradeLevel];
       if (row && row.classroom_url) {
         btn.href = row.classroom_url;
-        if (row.classroom_code) {
-          btn.title = 'Class code: ' + row.classroom_code;
-        }
+        // classroom_code no longer used (Drive links instead)
       } else {
         btn.href = '#';
         btn.style.opacity = '0.55';

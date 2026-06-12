@@ -918,3 +918,53 @@
   color: var(--text-soft);
   z-index: 2;
 }
+
+
+/* ============================================================
+   DRAG TO REORDER — Teacher cards
+   ============================================================ */
+.teacher-admin-card {
+  position: relative;
+}
+.teacher-drag-handle {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(0,0,0,0.3);
+  cursor: grab;
+  user-select: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.85);
+  z-index: 2;
+  transition: all 0.2s var(--ease);
+  letter-spacing: -2px;
+}
+.teacher-admin-card:hover .teacher-drag-handle {
+  color: var(--text-soft);
+  background: white;
+}
+.teacher-drag-handle:active {
+  cursor: grabbing;
+}
+
+.teacher-admin-card.dragging {
+  opacity: 0.4;
+  transform: scale(0.98);
+}
+.teacher-admin-card.drop-target {
+  border-color: var(--gold);
+  background: rgba(188, 139, 58, 0.08);
+  box-shadow: 0 0 0 3px rgba(188, 139, 58, 0.25);
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(8px); }
+  15%, 85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(8px); }
+}

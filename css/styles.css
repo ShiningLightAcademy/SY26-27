@@ -15,12 +15,12 @@
   --soft-gray: #FBFBFD;
   --line: #D2D2D7;
   --text-mute: #6E6E73;
-  --text-soft: #1D1D1F;
+  --text-soft: #001d3d;
   --black: #000000;
   --deep: #0A0A0A;
 
   /* School accents — used sparingly */
-  --navy: #0A1B4A;
+  --navy: #001d3d;
   --gold: #BC8B3A;
   --gold-soft: #D4AF6B;
 
@@ -854,11 +854,11 @@ section.sm { padding: clamp(3rem, 6vw, 5rem) 0; }
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
 }
 .teacher-photo {
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   background: var(--line);
   overflow: hidden;
 }
-.teacher-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.teacher-photo img { width: 100%; height: 100%; object-fit: cover; }
 .teacher-photo-placeholder {
   width: 100%; height: 100%;
   display: grid; place-items: center;
@@ -2286,4 +2286,153 @@ body {
 /* Push down body content when banner is shown */
 body:has(.sla-ann-banner.visible) {
   padding-top: 0;
+}
+
+
+/* ============================================================
+   CARNIVAL THEME — Festive accents layered on the school palette
+   Royal blue + gold remain primary. Carnival = decoration only.
+   ============================================================ */
+
+/* Pennant bunting — a string of triangular flags */
+.carnival-bunting {
+  position: relative;
+  height: 28px;
+  width: 100%;
+  margin: 0 0 0 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, transparent 5%, rgba(0,29,61,0.06) 5%, transparent 6%);
+}
+.carnival-bunting::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--navy) 20%,
+    var(--navy) 80%,
+    transparent 100%);
+  opacity: 0.5;
+}
+.carnival-bunting::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(45deg, transparent 49%, var(--gold) 49%, var(--gold) 51%, transparent 51%),
+    linear-gradient(-45deg, transparent 49%, var(--gold) 49%, var(--gold) 51%, transparent 51%),
+    linear-gradient(45deg, transparent 49%, var(--navy) 49%, var(--navy) 51%, transparent 51%),
+    linear-gradient(-45deg, transparent 49%, var(--navy) 49%, var(--navy) 51%, transparent 51%);
+  background-size: 28px 24px, 28px 24px, 28px 24px, 28px 24px;
+  background-position: 0 4px, 14px 4px, 28px 4px, 42px 4px;
+  background-repeat: repeat-x;
+  opacity: 0.85;
+  -webkit-mask-image: linear-gradient(180deg, black 0%, black 60%, transparent 100%);
+          mask-image: linear-gradient(180deg, black 0%, black 60%, transparent 100%);
+}
+
+/* Marquee lights — string of bulbs along edges */
+.carnival-lights {
+  position: relative;
+  height: 12px;
+  width: 100%;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% 50%, var(--gold) 0%, var(--gold) 20%, rgba(188,139,58,0.4) 35%, transparent 60%);
+  background-size: 24px 12px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.5;
+  animation: carnivalLights 1.6s ease-in-out infinite alternate;
+}
+@keyframes carnivalLights {
+  from { opacity: 0.4; filter: brightness(1); }
+  to   { opacity: 0.75; filter: brightness(1.4); }
+}
+
+/* Striped ribbon — diagonal bands of navy+gold */
+.carnival-ribbon {
+  height: 8px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--navy) 0px,
+    var(--navy) 12px,
+    var(--gold) 12px,
+    var(--gold) 24px
+  );
+  opacity: 0.18;
+}
+
+/* Confetti container — generates falling particles */
+.carnival-confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8000;
+  overflow: hidden;
+}
+.carnival-confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 8px;
+  height: 12px;
+  opacity: 0;
+  border-radius: 2px;
+  animation: confettiFall var(--dur, 3.5s) var(--delay, 0s) cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  transform-origin: center;
+}
+@keyframes confettiFall {
+  0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+  10%  { opacity: 1; }
+  100% { opacity: 0.4; transform: translateY(110vh) rotate(720deg); }
+}
+
+/* Stat cards — slight whimsical hover lift with gold halo */
+.stat:hover {
+  box-shadow:
+    0 16px 40px rgba(188, 139, 58, 0.18),
+    0 6px 18px rgba(0, 29, 61, 0.12);
+}
+
+/* Section eyebrow — give it a gold marker dot like a carnival pin */
+.t-eyebrow::before {
+  content: '◆';
+  display: inline-block;
+  color: var(--gold);
+  margin-right: 0.55rem;
+  transform: translateY(-1px);
+  font-size: 0.55em;
+  letter-spacing: 0;
+  opacity: 0.85;
+}
+
+/* Subtle striped pattern under footer */
+.footer {
+  position: relative;
+}
+.footer::before {
+  content: '';
+  display: block;
+  height: 6px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--gold) 0px,
+    var(--gold) 16px,
+    var(--navy) 16px,
+    var(--navy) 32px
+  );
+  opacity: 0.25;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carnival-lights { animation: none; }
+  .carnival-confetti-piece { animation: none; opacity: 0; }
 }
