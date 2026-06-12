@@ -130,7 +130,7 @@
     grid.innerHTML = data.map(t => {
       const initial = (t.full_name || '?').charAt(0).toUpperCase();
       const photo = t.photo_url
-        ? `<img src="${esc(t.photo_url)}" alt="${esc(t.full_name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'teacher-photo-placeholder', textContent: '${initial}'}))" style="width:100%;height:100%;object-fit:cover;" />`
+        ? `<img src="${esc(t.photo_url)}" alt="${esc(t.full_name)}" loading="eager" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'teacher-photo-placeholder', textContent: '${initial}'}))" style="width:100%;height:100%;object-fit:cover;" />`
         : `<div class="teacher-photo-placeholder">${esc(initial)}</div>`;
       const hasDetails = t.whatsapp || t.tm_smart || t.globe || t.email || t.zoom_link || t.meeting_id || t.passcode;
       return `
