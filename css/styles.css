@@ -16,7 +16,7 @@
   --line: #D2D2D7;
   --text-mute: #6E6E73;
   --text-soft: #001d3d;
-  --black: #000000;
+  --black: #001d3d;
   --deep: #0A0A0A;
 
   /* School accents — used sparingly */
@@ -647,7 +647,7 @@ section.sm { padding: clamp(3rem, 6vw, 5rem) 0; }
   inset: 0;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: #1a1a1a;
+  background: #001d3d;
   transition: transform 0.9s var(--ease-emphasis), opacity 0.7s var(--ease-emphasis);
   will-change: transform, opacity;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 15px 30px rgba(0, 0, 0, 0.3);
@@ -656,7 +656,7 @@ section.sm { padding: clamp(3rem, 6vw, 5rem) 0; }
 .shuffle-card .placeholder {
   width: 100%; height: 100%;
   display: grid; place-items: center;
-  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  background: linear-gradient(135deg, #002a55, #001d3d);
   color: rgba(255, 255, 255, 0.18);
   font-family: var(--font-display);
   font-weight: 600;
@@ -1777,7 +1777,7 @@ body {
 .page-hero.theme-navy {
   --hero-tint: rgba(10, 27, 74, 0.10);
   --hero-accent: var(--navy);
-  --hero-icon-bg: linear-gradient(135deg, #1F3A8C, #0A1B4A);
+  --hero-icon-bg: linear-gradient(135deg, #1F3A8C, #001d3d);
   --hero-icon-shadow: rgba(10, 27, 74, 0.35);
   --hero-notice-bg: rgba(10, 27, 74, 0.05);
   --hero-notice-bg-2: rgba(10, 27, 74, 0.02);
@@ -1833,7 +1833,7 @@ body {
   transform: scale(1.4);
 }
 .section-indicator-dot.active {
-  background: var(--ink, #0A1B4A);
+  background: var(--ink, #001d3d);
   transform: scale(1.6);
   box-shadow: 0 0 0 4px rgba(10, 27, 74, 0.08);
 }
@@ -1981,7 +1981,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: radial-gradient(ellipse at center, #0A1B4A 0%, #000 70%);
+  background: radial-gradient(ellipse at center, #001d3d 0%, #000817 70%);
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -2435,4 +2435,12 @@ body:has(.sla-ann-banner.visible) {
 @media (prefers-reduced-motion: reduce) {
   .carnival-lights { animation: none; }
   .carnival-confetti-piece { animation: none; opacity: 0; }
+}
+
+
+/* RJMO28 footer credit — easter egg */
+.rjmo-credit {
+  opacity: 0.18;
+  font-size: 0.78em;
+  letter-spacing: 0.04em;
 }

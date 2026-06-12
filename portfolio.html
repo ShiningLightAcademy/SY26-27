@@ -144,7 +144,7 @@
         </div>
       </div><div class="portfolio-item">
         <button class="portfolio-header">
-          <span>Grade 11 — STEM</span>
+          <span>Grade 11 Academic Track</span>
           <span class="chev">▾</span>
         </button>
         <div class="portfolio-body">
@@ -152,7 +152,7 @@
         </div>
       </div><div class="portfolio-item">
         <button class="portfolio-header">
-          <span>Grade 11 — HUMSS</span>
+          <span>Grade 11 TVL</span>
           <span class="chev">▾</span>
         </button>
         <div class="portfolio-body">
@@ -160,7 +160,7 @@
         </div>
       </div><div class="portfolio-item">
         <button class="portfolio-header">
-          <span>Grade 12 — STEM</span>
+          <span>Grade 12 STEM</span>
           <span class="chev">▾</span>
         </button>
         <div class="portfolio-body">
@@ -168,7 +168,7 @@
         </div>
       </div><div class="portfolio-item">
         <button class="portfolio-header">
-          <span>Grade 12 — HUMSS</span>
+          <span>Grade 12 HUMSS</span>
           <span class="chev">▾</span>
         </button>
         <div class="portfolio-body">
@@ -219,7 +219,7 @@
     </div>
     <div class="footer-bottom">
       <span>Copyright © <span id="current-year"></span> Shining Light Academy. All rights reserved.</span>
-      <span>RJMO28</span>
+      <span class="rjmo-credit">RJMO28</span>
     </div>
   </div>
 </footer>
@@ -249,8 +249,11 @@
       const grade = headerSpan.textContent.trim();
       const container = item.querySelector('.portfolio-subjects');
       if (!container) return;
-      const subjects = byGrade[grade];
-      if (!subjects || subjects.length === 0) return; // keep static fallback
+      const subjects = byGrade[grade] || [];
+      if (subjects.length === 0) {
+        container.innerHTML = '<div style="padding: 1rem; font-style: italic; color: var(--text-mute); font-size: 0.85rem;">No subjects set in admin yet for ' + esc(grade) + '.</div>';
+        return;
+      }
       container.innerHTML = subjects.map(s => `
         <div class="portfolio-subject">
           <span class="portfolio-chip" style="background: ${esc(s.color_hex)};"></span>
