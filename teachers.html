@@ -171,14 +171,14 @@
       const io = new IntersectionObserver((entries) => {
         entries.forEach(e => {
           if (e.isIntersecting) {
-            e.target.classList.add('revealed');
+            e.target.classList.add('in');
             io.unobserve(e.target);
           }
         });
       }, { rootMargin: '0px 0px -10% 0px' });
       grid.querySelectorAll('.reveal-up').forEach(el => io.observe(el));
     } else {
-      grid.querySelectorAll('.reveal-up').forEach(el => el.classList.add('revealed'));
+      grid.querySelectorAll('.reveal-up').forEach(el => el.classList.add('in'));
     }
   } catch (e) {
     console.warn('[teachers] failed to load:', e);
