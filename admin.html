@@ -299,6 +299,49 @@
 </div>
 
 
+
+<!-- Gallery set edit modal -->
+<div id="gset-modal" class="admin-modal" hidden>
+  <div class="admin-modal-content" style="max-width: 540px;">
+    <button class="admin-modal-close" id="gset-modal-close" aria-label="Close">×</button>
+    <h2 id="gset-modal-title" style="font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; margin-bottom: 0.4rem; letter-spacing: -0.015em;">New gallery set</h2>
+    <p style="color: var(--text-mute); font-size: 0.88rem; margin-bottom: 1.5rem;">Sets show as sections on the public Gallery page. Size controls how wide they are in the grid.</p>
+
+    <input type="hidden" id="gset-id" />
+
+    <div class="teacher-form-fields" style="margin-bottom: 1rem;">
+      <label>Title <span class="required">*</span>
+        <input type="text" id="gset-title" placeholder="e.g. Foundation Day 2024" />
+      </label>
+      <label>Subtitle / description
+        <input type="text" id="gset-meta" placeholder="e.g. A night to remember for the Seniors" />
+      </label>
+      <label>Event date
+        <input type="date" id="gset-date" />
+      </label>
+      <label style="margin-top: 0.5rem;">Card size on public page
+        <div class="gset-size-picker">
+          <label class="gset-size-opt"><input type="radio" name="gset-size" value="small" /><span>Small</span><small>¼ width · 4 in a row</small></label>
+          <label class="gset-size-opt"><input type="radio" name="gset-size" value="medium" checked /><span>Medium</span><small>½ width · 2 in a row</small></label>
+          <label class="gset-size-opt"><input type="radio" name="gset-size" value="large" /><span>Large</span><small>¾ width</small></label>
+          <label class="gset-size-opt"><input type="radio" name="gset-size" value="full" /><span>Full</span><small>Full width</small></label>
+        </div>
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem;">
+        <input type="checkbox" id="gset-visible" checked /> Visible on public Gallery page
+      </label>
+    </div>
+
+    <div id="gset-form-feedback" class="admin-feedback"></div>
+
+    <div class="teacher-form-actions">
+      <div style="flex: 1;"></div>
+      <button id="gset-cancel-btn" class="btn btn-ghost">Cancel</button>
+      <button id="gset-save-btn" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Teacher edit modal -->
 <div id="teacher-modal" class="admin-modal" hidden>
   <div class="admin-modal-content" style="max-width: 720px;">

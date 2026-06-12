@@ -926,37 +926,69 @@
     loadGallery(); // update counts
   }
 
-  // Create / edit set modal (lightweight inline prompts)
-  async function editGallerySet(id) {
-    let title, meta, eventDate, isVisible = true;
-    if (id) {
-      const { data } = await window.sla.db.from('gallery_sets').select('*').eq('id', id).single();
-      if (!data) return;
-      title = data.title; meta = data.meta || ''; eventDate = data.event_date || ''; isVisible = data.is_visible;
-    } else {
-      title = ''; meta = ''; eventDate = '';
-    }
-    const newTitle = prompt('Title (e.g. "Foundation Day 2024"):', title);
-    if (newTitle === null) return;
-    const newMeta = prompt('Subtitle / Description (optional):', meta) || '';
-    const newDate = prompt('Date (YYYY-MM-DD, optional):', eventDate) || '';
+  // Create / edit set — uses inline modal form (not prompts)
+  const gsetModal = document.getElementById('gset-modal');
+  function openGsetModal(id) {
+    document.getElementById('gset-id').value = '';
+    document.getElementById('gset-title').value = '';
+    document.getElementById('gset-meta').value = '';
+    document.getElementById('gset-date').value = '';
+    document.getElementById('gset-visible').checked = true;
+    document.querySelectorAll('input[name="gset-size"]').forEach(r => { r.checked = (r.value === 'medium'); });
+    document.getElementById('gset-form-feedback').textContent = '';
+    document.getElementById('gset-form-feedback').className = 'admin-feedback';
+    document.getElementById('gset-modal-title').textContent = id ? 'Edit gallery set' : 'New gallery set';
 
+    if (id) {
+      window.sla.db.from('gallery_sets').select('*').eq('id', id).single().then(({ data }) => {
+        if (!data) return;
+        document.getElementById('gset-id').value = data.id;
+        document.getElementById('gset-title').value = data.title || '';
+        document.getElementById('gset-meta').value = data.meta || '';
+        document.getElementById('gset-date').value = data.event_date || '';
+        document.getElementById('gset-visible').checked = !!data.is_visible;
+        const size = data.size_class || 'medium';
+        document.querySelectorAll('input[name="gset-size"]').forEach(r => { r.checked = (r.value === size); });
+      });
+    }
+    gsetModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeGsetModal() {
+    gsetModal.hidden = true;
+    document.body.style.overflow = '';
+  }
+  document.getElementById('gset-modal-close').addEventListener('click', closeGsetModal);
+  document.getElementById('gset-cancel-btn').addEventListener('click', closeGsetModal);
+  gsetModal.addEventListener('click', e => { if (e.target === gsetModal) closeGsetModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !gsetModal.hidden) closeGsetModal(); });
+
+  document.getElementById('gset-save-btn').addEventListener('click', async () => {
+    const fb = document.getElementById('gset-form-feedback');
+    fb.className = 'admin-feedback'; fb.textContent = '';
+    const title = document.getElementById('gset-title').value.trim();
+    if (!title) { fb.classList.add('error'); fb.textContent = 'Title is required.'; return; }
+    const sizeRadio = document.querySelector('input[name="gset-size"]:checked');
     const payload = {
-      title: newTitle.trim() || 'Untitled set',
-      meta: newMeta.trim() || null,
-      event_date: newDate.trim() || null,
-      is_visible: isVisible,
+      title,
+      meta: document.getElementById('gset-meta').value.trim() || null,
+      event_date: document.getElementById('gset-date').value || null,
+      is_visible: document.getElementById('gset-visible').checked,
+      size_class: sizeRadio ? sizeRadio.value : 'medium',
     };
+    const id = document.getElementById('gset-id').value;
     const result = id
       ? await window.sla.db.from('gallery_sets').update(payload).eq('id', id)
       : await window.sla.db.from('gallery_sets').insert(payload);
-    if (result.error) { alert('Failed: ' + result.error.message); return; }
+    if (result.error) { fb.classList.add('error'); fb.textContent = 'Save failed: ' + result.error.message; return; }
+    closeGsetModal();
     loadGallery();
-  }
+  });
+
+  function editGallerySet(id) { openGsetModal(id); }
 
   async function deleteGallerySet(id) {
     if (!confirm('Delete this gallery set? All its photos will also be deleted.')) return;
-    // Delete photo files from storage
     const { data: photos } = await window.sla.db.from('gallery_photos').select('photo_url').eq('set_id', id);
     const paths = (photos || [])
       .map(p => p.photo_url)
@@ -970,7 +1002,7 @@
   }
 
   document.addEventListener('click', e => {
-    if (e.target && e.target.id === 'gset-add-btn') editGallerySet(null);
+    if (e.target && e.target.id === 'gset-add-btn') openGsetModal(null);
   });
 
 

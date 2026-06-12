@@ -2447,18 +2447,37 @@ body:has(.sla-ann-banner.visible) {
 
 
 /* ============================================================
-   GALLERY PAGE — Clean section + carousel layout
+   GALLERY PAGE — Grid layout with size variants
+   small=1col, medium=2col, large=3col, full=4col (out of 4)
    ============================================================ */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem 1.5rem;
+  margin-bottom: 4rem;
+}
+
 .gallery-section {
-  margin-bottom: 5rem;
   opacity: 0;
   transform: translateY(20px);
   animation: gallerySectionIn 0.8s var(--ease-emphasis) forwards;
+  display: flex;
+  flex-direction: column;
 }
-.gallery-section:nth-child(2) { animation-delay: 0.08s; }
-.gallery-section:nth-child(3) { animation-delay: 0.16s; }
-.gallery-section:nth-child(4) { animation-delay: 0.24s; }
-.gallery-section:nth-child(5) { animation-delay: 0.32s; }
+.gallery-section[data-size="small"] { grid-column: span 1; }
+.gallery-section[data-size="medium"] { grid-column: span 2; }
+.gallery-section[data-size="large"] { grid-column: span 3; }
+.gallery-section[data-size="full"] { grid-column: span 4; }
+
+.gallery-section:nth-child(2)  { animation-delay: 0.06s; }
+.gallery-section:nth-child(3)  { animation-delay: 0.12s; }
+.gallery-section:nth-child(4)  { animation-delay: 0.18s; }
+.gallery-section:nth-child(5)  { animation-delay: 0.24s; }
+.gallery-section:nth-child(6)  { animation-delay: 0.30s; }
+.gallery-section:nth-child(7)  { animation-delay: 0.36s; }
+.gallery-section:nth-child(8)  { animation-delay: 0.42s; }
+.gallery-section:nth-child(9)  { animation-delay: 0.48s; }
+.gallery-section:nth-child(10) { animation-delay: 0.54s; }
 
 @keyframes gallerySectionIn {
   to { opacity: 1; transform: translateY(0); }
@@ -2466,18 +2485,23 @@ body:has(.sla-ann-banner.visible) {
 
 .gallery-section-head {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.85rem;
 }
 .gallery-section-head h2 {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
   color: var(--text-soft);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+.gallery-section[data-size="large"] .gallery-section-head h2,
+.gallery-section[data-size="full"]  .gallery-section-head h2 {
+  font-size: clamp(1.3rem, 2.2vw, 1.75rem);
 }
 .gallery-section-meta {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--text-mute);
   letter-spacing: 0.01em;
 }
@@ -2485,19 +2509,25 @@ body:has(.sla-ann-banner.visible) {
 .gallery-carousel {
   position: relative;
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  border-radius: var(--radius-xl, 24px);
+  border-radius: 14px;
   overflow: hidden;
   background: rgba(0, 29, 61, 0.04);
-  box-shadow: 0 24px 60px rgba(0, 29, 61, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 29, 61, 0.1);
+  flex: 1;
 }
 
 .gallery-carousel-track {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
   background: linear-gradient(135deg, rgba(0,29,61,0.85), rgba(0,29,61,0.95));
+}
+.gallery-section[data-size="full"]  .gallery-carousel-track,
+.gallery-section[data-size="large"] .gallery-carousel-track {
+  aspect-ratio: 16 / 9;
+}
+.gallery-section[data-size="small"] .gallery-carousel-track {
+  aspect-ratio: 1 / 1;
 }
 
 .gallery-slide {
@@ -2505,14 +2535,8 @@ body:has(.sla-ann-banner.visible) {
   inset: 0;
   opacity: 0;
   transition: opacity 0.7s var(--ease-emphasis);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-.gallery-slide.active {
-  opacity: 1;
-  z-index: 1;
-}
+.gallery-slide.active { opacity: 1; z-index: 1; }
 .gallery-slide img {
   width: 100%;
   height: 100%;
@@ -2523,27 +2547,25 @@ body:has(.sla-ann-banner.visible) {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2rem 1.5rem 1.25rem;
+  padding: 1.5rem 1rem 0.85rem;
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 500;
   text-align: center;
   background: linear-gradient(180deg, transparent 0%, rgba(0,29,61,0.85) 100%);
-  letter-spacing: -0.01em;
 }
 
 .gallery-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   color: var(--text-soft);
-  font-size: 1.6rem;
-  font-weight: 400;
+  font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
   z-index: 5;
@@ -2551,29 +2573,31 @@ body:has(.sla-ann-banner.visible) {
   place-items: center;
   font-family: inherit;
   transition: all 0.3s var(--ease);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  opacity: 0;
 }
+.gallery-section:hover .gallery-arrow { opacity: 1; }
 .gallery-arrow:hover {
   background: white;
   transform: translateY(-50%) scale(1.1);
 }
-.gallery-prev { left: 16px; }
-.gallery-next { right: 16px; }
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
 
 .gallery-dots {
   position: absolute;
-  bottom: 12px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 0.4rem;
+  gap: 0.3rem;
   z-index: 4;
 }
 .gallery-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.55);
   border: none;
   cursor: pointer;
   padding: 0;
@@ -2581,16 +2605,23 @@ body:has(.sla-ann-banner.visible) {
 }
 .gallery-dot.active {
   background: var(--gold);
-  width: 24px;
+  width: 20px;
   border-radius: 999px;
 }
-.gallery-dot:hover { background: rgba(255, 255, 255, 0.85); }
 
-@media (max-width: 640px) {
-  .gallery-arrow { width: 38px; height: 38px; font-size: 1.4rem; }
-  .gallery-prev { left: 8px; }
-  .gallery-next { right: 8px; }
-  .gallery-section { margin-bottom: 3.5rem; }
+/* Responsive: collapse to fewer columns on smaller screens */
+@media (max-width: 1100px) {
+  .gallery-section[data-size="small"] { grid-column: span 2; }
+}
+@media (max-width: 760px) {
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; }
+  .gallery-section[data-size]            { grid-column: span 2; }
+  .gallery-section[data-size="small"]    { grid-column: span 1; }
+}
+@media (max-width: 500px) {
+  .gallery-grid { grid-template-columns: 1fr; }
+  .gallery-section[data-size] { grid-column: span 1; }
+  .gallery-arrow { opacity: 1; width: 32px; height: 32px; }
 }
 
 /* Page hero (shared style for /gallery, /portfolio etc.) */
@@ -2633,4 +2664,51 @@ body:has(.sla-ann-banner.visible) {
   right: 0;
   bottom: 0;
   z-index: 2;
+}
+
+
+/* ============================================================
+   NAV OVERFLOW FIX — auth-injected items styled subtly
+   so the 9-item nav doesn't wrap awkwardly
+   ============================================================ */
+.nav-links {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+.nav-links a {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+/* Visually demote the auth-injected links so they don't compete with main nav */
+.nav-links li:has(.sla-admin-link),
+.nav-links li:has(.sla-signout-link) {
+  margin-left: 0.3rem;
+}
+.nav-links li:has(.sla-signout-link)::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  background: rgba(0, 29, 61, 0.18);
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+.sla-admin-link,
+.sla-signout-link {
+  font-size: 0.74rem !important;
+  padding: 0.35rem 0.7rem !important;
+  opacity: 0.65 !important;
+  letter-spacing: 0.01em;
+}
+.sla-admin-link:hover,
+.sla-signout-link:hover {
+  opacity: 1 !important;
+}
+
+/* Slightly tighten the nav-brand on smaller widths */
+@media (max-width: 980px) {
+  .nav-brand span {
+    font-size: 0.82rem;
+  }
 }

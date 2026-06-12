@@ -1110,3 +1110,53 @@
   box-shadow: 0 0 0 3px rgba(188, 139, 58, 0.25);
 }
 .shuffle-admin-card.hidden-shuffle { opacity: 0.55; }
+
+
+/* ============================================================
+   GSET MODAL — size picker radio cards
+   ============================================================ */
+.gset-size-picker {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.gset-size-opt {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.15rem !important;
+  padding: 0.7rem 0.9rem !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 10px;
+  cursor: pointer;
+  background: white;
+  transition: all 0.2s var(--ease);
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  color: var(--text-soft) !important;
+  position: relative;
+}
+.gset-size-opt:hover { background: rgba(0,0,0,0.02); }
+.gset-size-opt input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.gset-size-opt span {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.gset-size-opt small {
+  font-size: 0.7rem;
+  color: var(--text-mute);
+  font-weight: 400;
+}
+.gset-size-opt:has(input:checked) {
+  border-color: var(--text-soft) !important;
+  background: var(--text-soft) !important;
+  color: white !important;
+}
+.gset-size-opt:has(input:checked) small {
+  color: rgba(255,255,255,0.75);
+}

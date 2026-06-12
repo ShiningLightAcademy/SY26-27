@@ -133,10 +133,11 @@
       photosBySet[p.set_id].push(p);
     });
 
-    // Render each set as a section with one carousel
-    container.innerHTML = sets.map((set, idx) => {
+    // Render sections in a 4-column grid; each section takes 1/2/3/4 cols
+    const sectionsHtml = sets.map(set => {
       const setPhotos = photosBySet[set.id] || [];
       if (setPhotos.length === 0) return ''; // skip empty sets
+      const size = set.size_class || 'medium';
 
       const slides = setPhotos.map((p, i) => `
         <div class="gallery-slide${i === 0 ? ' active' : ''}" data-index="${i}">
@@ -152,7 +153,7 @@
       const meta = [set.meta, fmtDate(set.event_date)].filter(Boolean).join(' · ');
 
       return `
-        <article class="gallery-section" data-set-id="${set.id}">
+        <article class="gallery-section" data-set-id="${set.id}" data-size="${esc(size)}">
           <header class="gallery-section-head">
             <h2>${esc(set.title)}</h2>
             ${meta ? `<p class="gallery-section-meta">${esc(meta)}</p>` : ''}
@@ -169,7 +170,9 @@
       `;
     }).filter(Boolean).join('');
 
-    // Wire up carousel controls
+    container.innerHTML = `<div class="gallery-grid">${sectionsHtml}</div>`;
+
+    // Wire up carousel controls (per-section)
     container.querySelectorAll('.gallery-carousel').forEach(carousel => {
       const count = parseInt(carousel.dataset.photoCount, 10);
       if (count <= 1) return;
