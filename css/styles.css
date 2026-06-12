@@ -1971,3 +1971,148 @@ body {
   background: rgba(255, 255, 255, 0.95);
   transform: translateY(-50%) scale(1.08);
 }
+
+
+/* ============================================================
+   INTRO ANIMATION — Logo emergence + light burst
+   Plays once per browser session.
+   ============================================================ */
+.sla-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(ellipse at center, #0A1B4A 0%, #000 70%);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: hidden;
+  animation: introBgFade 2.4s var(--ease-emphasis) forwards;
+}
+.sla-intro.done {
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-emphasis);
+}
+
+.sla-intro-content {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.sla-intro-logo {
+  width: clamp(100px, 14vw, 160px);
+  height: auto;
+  opacity: 0;
+  transform: scale(0.3);
+  filter: drop-shadow(0 0 0 rgba(255, 220, 100, 0));
+  animation: introLogo 2.2s var(--ease-emphasis) forwards;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes introLogo {
+  0%   { opacity: 0; transform: scale(0.3) rotate(-8deg); filter: drop-shadow(0 0 0 rgba(255, 220, 100, 0)); }
+  18%  { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 30px rgba(255, 220, 100, 0.7)); }
+  35%  { transform: scale(1.18) rotate(2deg); filter: drop-shadow(0 0 80px rgba(255, 220, 100, 1)); }
+  55%  { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 50px rgba(255, 220, 100, 0.6)); }
+  85%  { opacity: 0.85; transform: scale(0.85); filter: drop-shadow(0 0 20px rgba(255, 220, 100, 0.4)); }
+  100% { opacity: 0; transform: scale(0.4); filter: drop-shadow(0 0 0 rgba(255, 220, 100, 0)); }
+}
+
+@keyframes introBgFade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.sla-intro-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sla-intro-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--size, 6px);
+  height: var(--size, 6px);
+  border-radius: 50%;
+  background: var(--p-color, rgba(255, 220, 100, 0.9));
+  box-shadow: 0 0 12px var(--p-color, rgba(255, 220, 100, 0.7));
+  opacity: 0;
+  margin-left: calc(var(--size, 6px) / -2);
+  margin-top: calc(var(--size, 6px) / -2);
+  animation: introParticle 1.5s var(--delay, 0.7s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes introParticle {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0); }
+  15%  { opacity: 1; transform: translate(calc(var(--tx) * 0.18), calc(var(--ty) * 0.18)) scale(1); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+}
+
+/* Rays — soft radial light from center on second burst */
+.sla-intro-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 800px;
+  height: 800px;
+  margin-left: -400px;
+  margin-top: -400px;
+  background:
+    radial-gradient(circle, rgba(255, 220, 100, 0.4) 0%, transparent 30%);
+  opacity: 0;
+  animation: introRays 1.4s 0.4s var(--ease-emphasis) forwards;
+  z-index: 1;
+}
+@keyframes introRays {
+  0%   { opacity: 0; transform: scale(0.4); }
+  40%  { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+/* Reduced motion — skip animation entirely */
+@media (prefers-reduced-motion: reduce) {
+  .sla-intro { display: none !important; }
+}
+
+
+/* ============================================================
+   INTERACTIVE TOUCHES — magnetic-feeling buttons and tiles
+   ============================================================ */
+.shuffle-card, .grade-btn, .tool-card, .teacher-card, .gallery-set, .level-block, .stat, .vm-card {
+  transition: transform 0.5s var(--ease-emphasis), box-shadow 0.5s var(--ease-emphasis);
+}
+
+/* Subtle scale on stat hover */
+.stat:hover {
+  transform: translateY(-3px);
+  z-index: 1;
+}
+
+/* Magnetic-like hover on the hero glass */
+.hero-glass {
+  transition: transform 0.6s var(--ease-emphasis), box-shadow 0.6s var(--ease-emphasis);
+}
+
+/* Cursor follower (subtle gold dot) — only on devices with a fine pointer */
+@media (pointer: fine) {
+  .sla-cursor {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(188, 139, 58, 0.4), transparent 70%);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s var(--ease), opacity 0.3s var(--ease);
+    opacity: 0;
+    mix-blend-mode: screen;
+  }
+  .sla-cursor.visible { opacity: 1; }
+  .sla-cursor.hovering { transform: translate(-50%, -50%) scale(2); background: radial-gradient(circle, rgba(188, 139, 58, 0.6), transparent 70%); }
+}

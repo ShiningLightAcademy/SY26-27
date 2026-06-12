@@ -298,3 +298,125 @@
     goTo(0);
   });
 })();
+
+// ============================================================
+// INTRO ANIMATION — Logo emergence + light burst
+// Plays once per browser tab session.
+// ============================================================
+(function () {
+  // Skip on admin/login pages, or if already shown this session
+  const path = window.location.pathname;
+  if (path.endsWith('/admin.html') || path.endsWith('/login.html')) return;
+  if (sessionStorage.getItem('sla-intro-shown')) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  sessionStorage.setItem('sla-intro-shown', '1');
+
+  // Build the overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'sla-intro';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.innerHTML = `
+    <div class="sla-intro-content">
+      <div class="sla-intro-rays"></div>
+      <div class="sla-intro-particles"></div>
+      <img src="images/sla-logo.svg" alt="" class="sla-intro-logo" />
+    </div>
+  `;
+  // Insert at top of body
+  if (document.body) {
+    document.body.insertBefore(overlay, document.body.firstChild);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.insertBefore(overlay, document.body.firstChild);
+    }, { once: true });
+  }
+
+  // Generate particles bursting outward
+  const particles = overlay.querySelector('.sla-intro-particles');
+  const colors = [
+    'rgba(255, 220, 100, 0.95)',  // gold
+    'rgba(255, 240, 180, 0.95)',  // bright cream
+    'rgba(255, 200, 80, 0.9)',    // amber
+    'rgba(255, 255, 255, 0.85)',  // white
+  ];
+  const COUNT = 36;
+  for (let i = 0; i < COUNT; i++) {
+    const p = document.createElement('div');
+    p.className = 'sla-intro-particle';
+    const angle = (i / COUNT) * Math.PI * 2 + (Math.random() * 0.3);
+    const distance = 200 + Math.random() * 400;
+    const size = 3 + Math.random() * 10;
+    const delay = 0.55 + Math.random() * 0.35;
+    p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+    p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+    p.style.setProperty('--size', `${size}px`);
+    p.style.setProperty('--delay', `${delay}s`);
+    p.style.setProperty('--p-color', colors[i % colors.length]);
+    particles.appendChild(p);
+  }
+
+  // Remove after animation completes (total ~2.4s)
+  setTimeout(() => {
+    overlay.classList.add('done');
+    setTimeout(() => overlay.remove(), 900);
+  }, 2300);
+})();
+
+// ============================================================
+// SUBTLE CURSOR FOLLOWER (gold glow that trails the mouse)
+// Only on devices with a fine pointer (desktop).
+// ============================================================
+(function () {
+  if (!window.matchMedia('(pointer: fine)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const cursor = document.createElement('div');
+  cursor.className = 'sla-cursor';
+  document.body.appendChild(cursor);
+
+  let mouseX = -100, mouseY = -100;
+  let currX = -100, currY = -100;
+  let ticking = false;
+
+  function animate() {
+    // Smooth lerp toward target
+    currX += (mouseX - currX) * 0.22;
+    currY += (mouseY - currY) * 0.22;
+    cursor.style.left = currX + 'px';
+    cursor.style.top = currY + 'px';
+    ticking = false;
+    if (Math.abs(mouseX - currX) > 0.5 || Math.abs(mouseY - currY) > 0.5) {
+      requestAnimationFrame(animate);
+      ticking = true;
+    }
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.classList.add('visible');
+    if (!ticking) {
+      requestAnimationFrame(animate);
+      ticking = true;
+    }
+  });
+
+  document.addEventListener('mouseleave', () => {
+    cursor.classList.remove('visible');
+  });
+
+  // Scale up when hovering interactive elements
+  document.addEventListener('mouseover', (e) => {
+    const t = e.target;
+    if (t.closest && t.closest('a, button, .grade-btn, .teacher-card, .shuffle-card, .gallery-collage-cell, .tool-card')) {
+      cursor.classList.add('hovering');
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    const t = e.target;
+    if (t.closest && t.closest('a, button, .grade-btn, .teacher-card, .shuffle-card, .gallery-collage-cell, .tool-card')) {
+      cursor.classList.remove('hovering');
+    }
+  });
+})();

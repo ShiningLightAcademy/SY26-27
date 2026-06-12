@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Shining Light Academy</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="icon" type="image/svg+xml" href="images/sla-logo.svg" />
+
+<!-- Auth (must load before page content) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+</head>
+<body class="admin-body">
+
+<!-- Loading state -->
+<div id="admin-loading" class="admin-loading">
+  <div class="admin-loading-spinner"></div>
+  <div>Checking permissions…</div>
+</div>
+
+<!-- Not-authorized state -->
+<div id="admin-denied" class="admin-denied" hidden>
+  <div>
+    <h2>Access denied</h2>
+    <p>You don't have admin privileges. If this is a mistake, contact the main admin.</p>
+    <a href="index.html" class="btn btn-primary" style="margin-top: 1.5rem;">← Back to site</a>
+  </div>
+</div>
+
+<!-- Admin app -->
+<div id="admin-app" class="admin-app" hidden>
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <img src="images/sla-logo.svg" alt="" />
+      <div>
+        <strong>Admin</strong>
+        <span>Shining Light Academy</span>
+      </div>
+    </div>
+
+    <nav class="admin-nav">
+      <a href="#dashboard" class="admin-nav-link" data-view="dashboard">
+        <span class="icon">📊</span> <span>Dashboard</span>
+      </a>
+      <a href="#messages" class="admin-nav-link" data-view="messages">
+        <span class="icon">✉️</span> <span>Messages</span>
+        <span class="badge" id="unread-count" hidden></span>
+      </a>
+      <a href="#admins" class="admin-nav-link main-admin-only" data-view="admins" hidden>
+        <span class="icon">👥</span> <span>Admins</span>
+      </a>
+
+      <div class="admin-nav-section">Content (coming soon)</div>
+      <a href="#teachers" class="admin-nav-link disabled" data-view="teachers">
+        <span class="icon">👨‍🏫</span> <span>Teachers</span>
+      </a>
+      <a href="#announcements" class="admin-nav-link disabled" data-view="announcements">
+        <span class="icon">📢</span> <span>Announcements</span>
+      </a>
+      <a href="#schedule" class="admin-nav-link disabled" data-view="schedule">
+        <span class="icon">📅</span> <span>Schedule</span>
+      </a>
+      <a href="#classrooms" class="admin-nav-link disabled" data-view="classrooms">
+        <span class="icon">🏫</span> <span>Classrooms</span>
+      </a>
+      <a href="#portfolio" class="admin-nav-link disabled" data-view="portfolio">
+        <span class="icon">🎨</span> <span>Portfolio</span>
+      </a>
+      <a href="#gallery" class="admin-nav-link disabled" data-view="gallery">
+        <span class="icon">🖼️</span> <span>Gallery</span>
+      </a>
+    </nav>
+
+    <div class="admin-foot">
+      <div class="admin-user">
+        <div class="admin-user-avatar" id="user-avatar">…</div>
+        <div class="admin-user-info">
+          <strong id="user-name">Loading…</strong>
+          <small id="user-email"></small>
+        </div>
+      </div>
+      <button class="admin-signout" id="signout-btn">Sign out</button>
+      <a href="index.html" class="admin-foot-link">← Back to site</a>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <!-- Dashboard -->
+    <section class="admin-view" data-view="dashboard">
+      <header class="admin-view-head">
+        <h1>Dashboard</h1>
+        <p>Welcome back, <span id="welcome-name">admin</span>.</p>
+      </header>
+
+      <div class="admin-stats">
+        <div class="admin-stat">
+          <div class="admin-stat-num" id="stat-users">—</div>
+          <div class="admin-stat-label">Active users (7d)</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" id="stat-messages">—</div>
+          <div class="admin-stat-label">Unread messages</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" id="stat-teachers">—</div>
+          <div class="admin-stat-label">Teachers listed</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" id="stat-announcements">—</div>
+          <div class="admin-stat-label">Active announcements</div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>Recent activity</h3>
+        <p class="admin-card-sub">Users who have signed in or visited recently.</p>
+        <div id="recent-activity" class="admin-list">
+          <div class="admin-empty">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Messages -->
+    <section class="admin-view" data-view="messages">
+      <header class="admin-view-head">
+        <h1>Drop us a message</h1>
+        <p>Inquiries submitted through the contact form. Click any message to read.</p>
+      </header>
+      <div id="messages-list" class="admin-list">
+        <div class="admin-empty">Loading messages…</div>
+      </div>
+    </section>
+
+    <!-- Admins (main-admin only) -->
+    <section class="admin-view main-admin-only" data-view="admins" hidden>
+      <header class="admin-view-head">
+        <h1>Admins</h1>
+        <p>Only you (main admin) can promote or demote admin access.</p>
+      </header>
+
+      <div class="admin-card">
+        <h3>Promote a user to admin</h3>
+        <p class="admin-card-sub">The user must have signed in at least once with their @slasm.net account before they can be promoted.</p>
+        <div class="admin-form-row">
+          <input type="email" id="promote-email" placeholder="user@slasm.net" autocomplete="off" />
+          <button id="promote-btn" class="btn btn-primary">Promote</button>
+        </div>
+        <div id="promote-feedback" class="admin-feedback"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3>Current admins</h3>
+        <div id="admins-list" class="admin-list">
+          <div class="admin-empty">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Placeholder views -->
+    <section class="admin-view" data-view="teachers">
+      <header class="admin-view-head">
+        <h1>Teachers</h1>
+        <p>Coming next — full CRUD for the teacher roster, including photo uploads.</p>
+      </header>
+      <div class="admin-placeholder">
+        <p>This section will let you add, edit, and delete teacher cards, upload their photos, and set contact details. Until it's built, the placeholder cards on the public Teachers page stay as they are.</p>
+      </div>
+    </section>
+
+    <section class="admin-view" data-view="announcements">
+      <header class="admin-view-head">
+        <h1>Announcements</h1>
+        <p>Coming next — compose popup messages that appear on the homepage.</p>
+      </header>
+      <div class="admin-placeholder">
+        <p>This section will let you create and schedule announcements. When active, they show as a glass popup on first visit, then collapse to a thin banner if dismissed.</p>
+      </div>
+    </section>
+
+    <section class="admin-view" data-view="schedule">
+      <header class="admin-view-head">
+        <h1>Schedule</h1>
+        <p>Coming next — edit the Google Drive link for each grade's schedule.</p>
+      </header>
+      <div class="admin-placeholder"><p>This section will replace the placeholder href="#" links on the Schedule page with real Drive URLs.</p></div>
+    </section>
+
+    <section class="admin-view" data-view="classrooms">
+      <header class="admin-view-head">
+        <h1>Classrooms</h1>
+        <p>Coming next — edit the Google Classroom link and join code for each grade.</p>
+      </header>
+      <div class="admin-placeholder"><p>This section will replace the placeholder href="#" links on the Classrooms page with real Classroom URLs and class codes.</p></div>
+    </section>
+
+    <section class="admin-view" data-view="portfolio">
+      <header class="admin-view-head">
+        <h1>Portfolio colors</h1>
+        <p>Coming next — change the subject color codes per grade level.</p>
+      </header>
+      <div class="admin-placeholder"><p>This section will let you visually pick the color, name, and label for each subject per grade.</p></div>
+    </section>
+
+    <section class="admin-view" data-view="gallery">
+      <header class="admin-view-head">
+        <h1>Gallery</h1>
+        <p>Coming next — upload and arrange photos into the masonry collages.</p>
+      </header>
+      <div class="admin-placeholder"><p>This section will let you create gallery sets, upload photos (max 5MB each), arrange them into collage cells with size variants, and reorder them by drag.</p></div>
+    </section>
+  </main>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
