@@ -3,6 +3,9 @@
    Uses tokens from styles.css but a tighter, denser aesthetic.
    ============================================================ */
 
+/* The `hidden` HTML attribute must always win over our display rules. */
+[hidden] { display: none !important; }
+
 .admin-body {
   font-family: var(--font-text);
   background: #F5F5F7;
