@@ -51,19 +51,19 @@
   <div class="container">
     <div class="level-block reveal-up">
       <div class="level-title">Preschool</div>
-      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn">Nursery</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Kindergarten</a></div>
+      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Nursery">Nursery</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Kindergarten">Kindergarten</a></div>
     </div>
     <div class="level-block dark reveal-up">
       <div class="level-title">Gradeschool</div>
-      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 1</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 2</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 3</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 4</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 5</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 6</a></div>
+      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 1">Grade 1</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 2">Grade 2</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 3">Grade 3</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 4">Grade 4</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 5">Grade 5</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 6">Grade 6</a></div>
     </div>
     <div class="level-block reveal-up">
       <div class="level-title">Junior High</div>
-      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 7</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 8</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 9</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 10</a></div>
+      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 7">Grade 7</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 8">Grade 8</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 9">Grade 9</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 10">Grade 10</a></div>
     </div>
     <div class="level-block dark reveal-up">
       <div class="level-title">Senior High</div>
-      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 11 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 11 HUMSS</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 12 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn">Grade 12 HUMSS</a></div>
+      <div class="grade-grid"><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 11 STEM">Grade 11 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 11 HUMSS">Grade 11 HUMSS</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 12 STEM">Grade 12 STEM</a><a href="#" target="_blank" rel="noopener" class="grade-btn" data-grade-level="Grade 12 HUMSS">Grade 12 HUMSS</a></div>
     </div>
     <p class="note">Each button is a placeholder. Replace each href="#" with the actual Google Classroom enrollment link.</p>
   </div>
@@ -114,5 +114,31 @@
   </div>
 </footer>
 <script src="js/main.js"></script>
+
+<script>
+(async () => {
+  if (!window.sla) return;
+  try {
+    const { data } = await window.sla.db.from('classroom_links').select('grade_level, classroom_url, classroom_code');
+    if (!data) return;
+    const byGrade = {};
+    data.forEach(r => { byGrade[r.grade_level] = r; });
+    document.querySelectorAll('.grade-btn[data-grade-level]').forEach(btn => {
+      const row = byGrade[btn.dataset.gradeLevel];
+      if (row && row.classroom_url) {
+        btn.href = row.classroom_url;
+        if (row.classroom_code) {
+          btn.title = 'Class code: ' + row.classroom_code;
+        }
+      } else {
+        btn.href = '#';
+        btn.style.opacity = '0.55';
+        btn.style.pointerEvents = 'none';
+        btn.title = 'Not yet set by admin';
+      }
+    });
+  } catch (e) { console.warn('[classrooms] failed to load links:', e); }
+})();
+</script>
 </body>
 </html>

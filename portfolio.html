@@ -224,5 +224,43 @@
   </div>
 </footer>
 <script src="js/main.js"></script>
+
+<script>
+(async () => {
+  if (!window.sla) return;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+  }
+  try {
+    const { data } = await window.sla.db.from('portfolio_subjects')
+      .select('grade_level, subject_name, color_hex, color_label, sort_order')
+      .order('grade_level').order('sort_order');
+    if (!data) return;
+    const byGrade = {};
+    data.forEach(r => {
+      if (!byGrade[r.grade_level]) byGrade[r.grade_level] = [];
+      byGrade[r.grade_level].push(r);
+    });
+    document.querySelectorAll('.portfolio-item').forEach(item => {
+      const headerSpan = item.querySelector('.portfolio-header span');
+      if (!headerSpan) return;
+      const grade = headerSpan.textContent.trim();
+      const container = item.querySelector('.portfolio-subjects');
+      if (!container) return;
+      const subjects = byGrade[grade];
+      if (!subjects || subjects.length === 0) return; // keep static fallback
+      container.innerHTML = subjects.map(s => `
+        <div class="portfolio-subject">
+          <span class="portfolio-chip" style="background: ${esc(s.color_hex)};"></span>
+          ${esc(s.subject_name)}
+          ${s.color_label ? `<span class="portfolio-chip-label">${esc(s.color_label)}</span>` : ''}
+        </div>
+      `).join('');
+    });
+  } catch (e) { console.warn('[portfolio] failed to load subjects:', e); }
+})();
+</script>
 </body>
 </html>

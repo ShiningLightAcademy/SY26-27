@@ -81,6 +81,10 @@
     if (name === 'dashboard') return loadDashboard();
     if (name === 'messages') return loadMessages();
     if (name === 'admins') return loadAdmins();
+    if (name === 'announcements') return loadAnnouncements();
+    if (name === 'schedule') return loadSchedule();
+    if (name === 'classrooms') return loadClassrooms();
+    if (name === 'portfolio') return loadPortfolio();
   }
 
   async function loadDashboard() {
@@ -359,5 +363,397 @@
     if (days < 7) return days + 'd ago';
     if (days < 30) return Math.floor(days / 7) + 'w ago';
     return d.toLocaleDateString();
+  }
+
+  // ============================================================
+  // ANNOUNCEMENTS — CRUD
+  // ============================================================
+  async function loadAnnouncements() {
+    const list = document.getElementById('ann-list');
+    if (!list) return;
+    list.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data, error } = await window.sla.db.from('announcements')
+      .select('*')
+      .order('is_active', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      list.innerHTML = `<div class="admin-empty">Failed: ${error.message}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="admin-empty">No announcements yet. Use the form above to create one.</div>';
+      return;
+    }
+
+    list.innerHTML = data.map(a => `
+      <div class="admin-list-item" style="cursor: default;">
+        <div>
+          <strong>${escapeHtml(a.title)} ${a.is_active ? '<span class="role-badge" style="background:#1E8E3E; margin-left: .4rem;">Active</span>' : ''}</strong>
+          <div class="meta">${escapeHtml(a.body.slice(0, 100))}${a.body.length > 100 ? '…' : ''}</div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="ann-edit" data-id="${a.id}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: white; cursor: pointer; font-family: inherit;">Edit</button>
+          <button class="ann-del" data-id="${a.id}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: white; cursor: pointer; font-family: inherit; color: #DC2626;">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.ann-edit').forEach(btn => {
+      btn.addEventListener('click', () => editAnnouncement(btn.dataset.id));
+    });
+    list.querySelectorAll('.ann-del').forEach(btn => {
+      btn.addEventListener('click', () => deleteAnnouncement(btn.dataset.id));
+    });
+  }
+
+  function clearAnnouncementForm() {
+    document.getElementById('ann-id').value = '';
+    document.getElementById('ann-title').value = '';
+    document.getElementById('ann-body').value = '';
+    document.getElementById('ann-link-text').value = '';
+    document.getElementById('ann-link-url').value = '';
+    document.getElementById('ann-active').checked = false;
+    document.getElementById('ann-form-title').textContent = 'Create new announcement';
+    document.getElementById('ann-cancel').style.display = 'none';
+    document.getElementById('ann-feedback').textContent = '';
+    document.getElementById('ann-feedback').className = 'admin-feedback';
+  }
+
+  async function editAnnouncement(id) {
+    const { data, error } = await window.sla.db.from('announcements')
+      .select('*').eq('id', id).single();
+    if (error || !data) return;
+    document.getElementById('ann-id').value = data.id;
+    document.getElementById('ann-title').value = data.title || '';
+    document.getElementById('ann-body').value = data.body || '';
+    document.getElementById('ann-link-text').value = data.link_text || '';
+    document.getElementById('ann-link-url').value = data.link_url || '';
+    document.getElementById('ann-active').checked = !!data.is_active;
+    document.getElementById('ann-form-title').textContent = 'Edit announcement';
+    document.getElementById('ann-cancel').style.display = 'inline-flex';
+    // Scroll to form
+    document.getElementById('ann-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function deleteAnnouncement(id) {
+    if (!confirm('Delete this announcement? This cannot be undone.')) return;
+    const { error } = await window.sla.db.from('announcements').delete().eq('id', id);
+    if (error) { alert('Failed: ' + error.message); return; }
+    loadAnnouncements();
+  }
+
+  async function saveAnnouncement() {
+    const feedback = document.getElementById('ann-feedback');
+    feedback.className = 'admin-feedback';
+    feedback.textContent = '';
+
+    const id = document.getElementById('ann-id').value || null;
+    const title = document.getElementById('ann-title').value.trim();
+    const body = document.getElementById('ann-body').value.trim();
+    const linkText = document.getElementById('ann-link-text').value.trim() || null;
+    const linkUrl = document.getElementById('ann-link-url').value.trim() || null;
+    const isActive = document.getElementById('ann-active').checked;
+
+    if (!title || !body) {
+      feedback.classList.add('error');
+      feedback.textContent = 'Title and body are required.';
+      return;
+    }
+
+    // If marking active, deactivate all others first
+    if (isActive) {
+      let q = window.sla.db.from('announcements').update({ is_active: false }).eq('is_active', true);
+      if (id) q = q.neq('id', id);
+      await q;
+    }
+
+    const payload = { title, body, link_text: linkText, link_url: linkUrl, is_active: isActive };
+
+    let result;
+    if (id) {
+      result = await window.sla.db.from('announcements').update(payload).eq('id', id);
+    } else {
+      result = await window.sla.db.from('announcements').insert(payload);
+    }
+
+    if (result.error) {
+      feedback.classList.add('error');
+      feedback.textContent = 'Save failed: ' + result.error.message;
+      return;
+    }
+
+    feedback.classList.add('success');
+    feedback.textContent = id ? 'Announcement updated.' : 'Announcement created.';
+    clearAnnouncementForm();
+    loadAnnouncements();
+    loadDashboard();
+  }
+
+  // Wire up announcement form buttons (one-time setup)
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'ann-save') saveAnnouncement();
+    if (e.target && e.target.id === 'ann-cancel') clearAnnouncementForm();
+  });
+
+
+  // ============================================================
+  // SCHEDULE — Edit Drive URL per grade
+  // ============================================================
+  const LEVEL_LABELS = {
+    preschool: 'Preschool',
+    gradeschool: 'Gradeschool',
+    junior_high: 'Junior High School',
+    senior_high: 'Senior High School',
+  };
+
+  async function loadSchedule() {
+    const editor = document.getElementById('schedule-editor');
+    editor.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data, error } = await window.sla.db.from('schedule_links')
+      .select('*')
+      .order('level_group')
+      .order('sort_order');
+
+    if (error) {
+      editor.innerHTML = `<div class="admin-empty">Failed: ${error.message}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      editor.innerHTML = '<div class="admin-empty">No grades configured. Run the seed SQL first.</div>';
+      return;
+    }
+
+    // Group by level_group
+    const groups = {};
+    data.forEach(r => {
+      if (!groups[r.level_group]) groups[r.level_group] = [];
+      groups[r.level_group].push(r);
+    });
+
+    editor.innerHTML = Object.entries(groups).map(([key, rows]) => `
+      <div class="admin-grade-group">
+        <h4>${escapeHtml(LEVEL_LABELS[key] || key)}</h4>
+        <div class="admin-grade-rows">
+          ${rows.map(r => `
+            <div class="admin-grade-row" data-id="${r.id}">
+              <span class="admin-grade-name">${escapeHtml(r.grade_level)}</span>
+              <input type="url" class="admin-grade-url" placeholder="https://drive.google.com/..." value="${escapeHtml(r.drive_url || '')}" />
+              <button class="admin-grade-save">Save</button>
+              <span class="admin-grade-feedback"></span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    editor.querySelectorAll('.admin-grade-save').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('.admin-grade-row');
+        const id = row.dataset.id;
+        const url = row.querySelector('.admin-grade-url').value.trim() || null;
+        const fb = row.querySelector('.admin-grade-feedback');
+        fb.textContent = 'Saving…';
+        fb.className = 'admin-grade-feedback';
+        const { error } = await window.sla.db.from('schedule_links')
+          .update({ drive_url: url, updated_at: new Date().toISOString() })
+          .eq('id', id);
+        if (error) {
+          fb.textContent = '✗ ' + error.message;
+          fb.classList.add('error');
+        } else {
+          fb.textContent = '✓ Saved';
+          fb.classList.add('success');
+          setTimeout(() => { fb.textContent = ''; fb.className = 'admin-grade-feedback'; }, 2000);
+        }
+      });
+    });
+  }
+
+
+  // ============================================================
+  // CLASSROOMS — Edit URL + Code per grade
+  // ============================================================
+  async function loadClassrooms() {
+    const editor = document.getElementById('classrooms-editor');
+    editor.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data, error } = await window.sla.db.from('classroom_links')
+      .select('*')
+      .order('level_group')
+      .order('sort_order');
+
+    if (error) {
+      editor.innerHTML = `<div class="admin-empty">Failed: ${error.message}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      editor.innerHTML = '<div class="admin-empty">No grades configured. Run the seed SQL first.</div>';
+      return;
+    }
+
+    const groups = {};
+    data.forEach(r => {
+      if (!groups[r.level_group]) groups[r.level_group] = [];
+      groups[r.level_group].push(r);
+    });
+
+    editor.innerHTML = Object.entries(groups).map(([key, rows]) => `
+      <div class="admin-grade-group">
+        <h4>${escapeHtml(LEVEL_LABELS[key] || key)}</h4>
+        <div class="admin-grade-rows">
+          ${rows.map(r => `
+            <div class="admin-grade-row admin-grade-row-wide" data-id="${r.id}">
+              <span class="admin-grade-name">${escapeHtml(r.grade_level)}</span>
+              <input type="url" class="admin-grade-url" placeholder="https://classroom.google.com/c/..." value="${escapeHtml(r.classroom_url || '')}" />
+              <input type="text" class="admin-grade-code" placeholder="Code" value="${escapeHtml(r.classroom_code || '')}" />
+              <button class="admin-grade-save">Save</button>
+              <span class="admin-grade-feedback"></span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    editor.querySelectorAll('.admin-grade-save').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('.admin-grade-row');
+        const id = row.dataset.id;
+        const url = row.querySelector('.admin-grade-url').value.trim() || null;
+        const code = row.querySelector('.admin-grade-code').value.trim() || null;
+        const fb = row.querySelector('.admin-grade-feedback');
+        fb.textContent = 'Saving…';
+        fb.className = 'admin-grade-feedback';
+        const { error } = await window.sla.db.from('classroom_links')
+          .update({ classroom_url: url, classroom_code: code, updated_at: new Date().toISOString() })
+          .eq('id', id);
+        if (error) {
+          fb.textContent = '✗ ' + error.message;
+          fb.classList.add('error');
+        } else {
+          fb.textContent = '✓ Saved';
+          fb.classList.add('success');
+          setTimeout(() => { fb.textContent = ''; fb.className = 'admin-grade-feedback'; }, 2000);
+        }
+      });
+    });
+  }
+
+
+  // ============================================================
+  // PORTFOLIO — Edit subjects + colors per grade
+  // ============================================================
+  const PORTFOLIO_GRADES = [
+    'Nursery', 'Kindergarten',
+    'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6',
+    'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10',
+    'Grade 11 STEM', 'Grade 11 HUMSS', 'Grade 12 STEM', 'Grade 12 HUMSS'
+  ];
+
+  async function loadPortfolio() {
+    const editor = document.getElementById('portfolio-editor');
+    editor.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data, error } = await window.sla.db.from('portfolio_subjects')
+      .select('*')
+      .order('grade_level')
+      .order('sort_order');
+
+    if (error) {
+      editor.innerHTML = `<div class="admin-empty">Failed: ${error.message}</div>`;
+      return;
+    }
+
+    // Group by grade
+    const groups = {};
+    PORTFOLIO_GRADES.forEach(g => groups[g] = []);
+    (data || []).forEach(r => {
+      if (!groups[r.grade_level]) groups[r.grade_level] = [];
+      groups[r.grade_level].push(r);
+    });
+
+    editor.innerHTML = `<div class="admin-card"><div id="portfolio-grades">
+      ${PORTFOLIO_GRADES.map(grade => {
+        const subjects = groups[grade] || [];
+        return `
+          <div class="portfolio-grade-block" data-grade="${escapeHtml(grade)}">
+            <h4>${escapeHtml(grade)} <span class="meta">(${subjects.length} subjects)</span></h4>
+            <div class="portfolio-subjects">
+              ${subjects.map(s => renderSubjectRow(s)).join('')}
+            </div>
+            <div class="portfolio-add-row">
+              <input type="text" class="portfolio-new-name" placeholder="Subject name (e.g. English)" />
+              <input type="color" class="portfolio-new-color" value="#888888" />
+              <input type="text" class="portfolio-new-label" placeholder="Color label (e.g. Red)" />
+              <button class="portfolio-add-btn">+ Add</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div></div>`;
+
+    wirePortfolio();
+  }
+
+  function renderSubjectRow(s) {
+    return `
+      <div class="portfolio-subject-row" data-id="${s.id}">
+        <input type="color" class="portfolio-color" value="${escapeHtml(s.color_hex)}" />
+        <input type="text" class="portfolio-name" value="${escapeHtml(s.subject_name)}" />
+        <input type="text" class="portfolio-label" placeholder="Color label" value="${escapeHtml(s.color_label || '')}" />
+        <button class="portfolio-save-btn">Save</button>
+        <button class="portfolio-del-btn">×</button>
+      </div>
+    `;
+  }
+
+  function wirePortfolio() {
+    document.querySelectorAll('.portfolio-add-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const block = btn.closest('.portfolio-grade-block');
+        const grade = block.dataset.grade;
+        const name = block.querySelector('.portfolio-new-name').value.trim();
+        const color = block.querySelector('.portfolio-new-color').value;
+        const label = block.querySelector('.portfolio-new-label').value.trim() || null;
+        if (!name) { alert('Subject name required.'); return; }
+        const { error } = await window.sla.db.from('portfolio_subjects').insert({
+          grade_level: grade,
+          subject_name: name,
+          color_hex: color,
+          color_label: label,
+          sort_order: 99,
+        });
+        if (error) { alert('Failed: ' + error.message); return; }
+        loadPortfolio();
+      });
+    });
+    document.querySelectorAll('.portfolio-save-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('.portfolio-subject-row');
+        const id = row.dataset.id;
+        const fields = {
+          color_hex: row.querySelector('.portfolio-color').value,
+          subject_name: row.querySelector('.portfolio-name').value.trim(),
+          color_label: row.querySelector('.portfolio-label').value.trim() || null,
+        };
+        const { error } = await window.sla.db.from('portfolio_subjects')
+          .update(fields).eq('id', id);
+        if (error) { alert('Failed: ' + error.message); return; }
+        btn.textContent = '✓';
+        setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+      });
+    });
+    document.querySelectorAll('.portfolio-del-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('.portfolio-subject-row');
+        if (!confirm('Delete this subject?')) return;
+        const { error } = await window.sla.db.from('portfolio_subjects')
+          .delete().eq('id', row.dataset.id);
+        if (error) { alert('Failed: ' + error.message); return; }
+        loadPortfolio();
+      });
+    });
   }
 })();

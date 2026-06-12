@@ -2116,3 +2116,174 @@ body {
   .sla-cursor.visible { opacity: 1; }
   .sla-cursor.hovering { transform: translate(-50%, -50%) scale(2); background: radial-gradient(circle, rgba(188, 139, 58, 0.6), transparent 70%); }
 }
+
+
+/* ============================================================
+   ANNOUNCEMENT POPUP + BANNER
+   ============================================================ */
+.sla-ann-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  z-index: 9000;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-emphasis);
+  pointer-events: none;
+}
+.sla-ann-popup.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sla-ann-popup-card {
+  position: relative;
+  max-width: 520px;
+  width: 100%;
+  padding: 2.5rem 2rem 2rem;
+  border-radius: var(--radius-xl);
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82));
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.9),
+    0 30px 80px rgba(0,0,0,0.35),
+    0 12px 28px rgba(0,0,0,0.2);
+  transform: translateY(30px) scale(0.96);
+  transition: transform 0.6s var(--ease-emphasis);
+}
+.sla-ann-popup.visible .sla-ann-popup-card {
+  transform: translateY(0) scale(1);
+}
+.sla-ann-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-soft);
+  display: grid;
+  place-items: center;
+  font-family: inherit;
+  transition: background 0.2s var(--ease);
+}
+.sla-ann-close:hover { background: rgba(0,0,0,0.15); }
+
+.sla-ann-eyebrow {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.sla-ann-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  letter-spacing: -0.02em;
+  color: var(--text-soft);
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+.sla-ann-body {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-soft);
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+}
+.sla-ann-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 1.4rem;
+  background: var(--text-soft);
+  color: white !important;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s var(--ease);
+}
+.sla-ann-link:hover {
+  background: var(--ink);
+  transform: translateY(-1px);
+}
+
+/* Banner (collapsed state) */
+.sla-ann-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8900;
+  background: linear-gradient(90deg, var(--navy), #142966);
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transform: translateY(-100%);
+  transition: transform 0.5s var(--ease-emphasis);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.sla-ann-banner.visible {
+  transform: translateY(0);
+}
+.sla-ann-banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.sla-ann-banner-icon { font-size: 1em; }
+.sla-ann-banner-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.sla-ann-banner-sep {
+  opacity: 0.6;
+}
+.sla-ann-banner-tap {
+  font-size: 0.78rem;
+  opacity: 0.75;
+  font-style: italic;
+}
+.sla-ann-banner-close {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: white;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-family: inherit;
+}
+.sla-ann-banner-close:hover { background: rgba(255,255,255,0.22); }
+
+@media (max-width: 600px) {
+  .sla-ann-banner-tap, .sla-ann-banner-sep { display: none; }
+}
+
+/* Push down body content when banner is shown */
+body:has(.sla-ann-banner.visible) {
+  padding-top: 0;
+}

@@ -506,3 +506,195 @@
     padding: 1.5rem 1rem 3rem;
   }
 }
+
+
+/* ============================================================
+   GRADE EDITORS (Schedule + Classrooms)
+   ============================================================ */
+.admin-grade-group {
+  margin-bottom: 1.75rem;
+}
+.admin-grade-group:last-child { margin-bottom: 0; }
+.admin-grade-group h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+.admin-grade-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.admin-grade-row {
+  display: grid;
+  grid-template-columns: 160px 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  background: rgba(0,0,0,0.025);
+  border-radius: 10px;
+}
+.admin-grade-row-wide {
+  grid-template-columns: 160px 1fr 130px auto auto;
+}
+.admin-grade-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+.admin-grade-url, .admin-grade-code {
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: white;
+  color: var(--text-soft);
+  min-width: 0;
+}
+.admin-grade-url:focus, .admin-grade-code:focus {
+  outline: none;
+  border-color: var(--text-soft);
+}
+.admin-grade-save {
+  padding: 0.55rem 1rem;
+  background: var(--text-soft);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s var(--ease);
+}
+.admin-grade-save:hover {
+  background: var(--ink);
+  transform: translateY(-1px);
+}
+.admin-grade-feedback {
+  font-size: 0.78rem;
+  color: var(--text-mute);
+  min-width: 60px;
+}
+.admin-grade-feedback.success { color: #1E8E3E; }
+.admin-grade-feedback.error { color: #DC2626; }
+
+@media (max-width: 720px) {
+  .admin-grade-row, .admin-grade-row-wide {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+}
+
+/* ============================================================
+   PORTFOLIO EDITOR
+   ============================================================ */
+.portfolio-grade-block {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.portfolio-grade-block:last-child { border-bottom: none; }
+.portfolio-grade-block h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-soft);
+}
+.portfolio-grade-block h4 .meta {
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-mute);
+  margin-left: 0.4rem;
+}
+.portfolio-subjects {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.portfolio-subject-row, .portfolio-add-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  background: rgba(0,0,0,0.025);
+  border-radius: 8px;
+}
+.portfolio-add-row {
+  background: rgba(188, 139, 58, 0.06);
+  border: 1px dashed rgba(0,0,0,0.1);
+  margin-top: 0.5rem;
+}
+.portfolio-color, .portfolio-new-color {
+  width: 56px;
+  height: 32px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  padding: 2px;
+}
+.portfolio-name, .portfolio-label, .portfolio-new-name, .portfolio-new-label {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: white;
+  min-width: 0;
+}
+.portfolio-name:focus, .portfolio-label:focus, .portfolio-new-name:focus, .portfolio-new-label:focus {
+  outline: none;
+  border-color: var(--text-soft);
+}
+.portfolio-save-btn, .portfolio-add-btn {
+  padding: 0.45rem 0.9rem;
+  background: var(--text-soft);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s var(--ease);
+}
+.portfolio-save-btn:hover, .portfolio-add-btn:hover {
+  background: var(--ink);
+}
+.portfolio-del-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: white;
+  color: #DC2626;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-family: inherit;
+  padding: 0;
+}
+.portfolio-del-btn:hover {
+  background: #FEE2E2;
+  border-color: #DC2626;
+}
+
+@media (max-width: 720px) {
+  .portfolio-subject-row, .portfolio-add-row {
+    grid-template-columns: 56px 1fr;
+    gap: 0.3rem;
+  }
+  .portfolio-subject-row > *:nth-child(n+3),
+  .portfolio-add-row > *:nth-child(n+3) {
+    grid-column: 1 / -1;
+  }
+}

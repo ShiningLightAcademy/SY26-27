@@ -420,3 +420,114 @@
     }
   });
 })();
+
+// ============================================================
+// ANNOUNCEMENT POPUP / BANNER
+// Shows on public pages if there's an active announcement.
+// - First view: full popup modal
+// - Dismissed: collapses to thin top banner
+// - Banner dismissed: hidden until a new announcement appears
+// ============================================================
+(function () {
+  if (!window.sla) return;
+  // Skip on login + admin pages
+  const path = window.location.pathname;
+  if (path.endsWith('/login.html') || path.endsWith('/admin.html')) return;
+
+  // Wait for DOM to be ready
+  function init() {
+    showAnnouncementIfAny().catch(e => console.warn('[SLA announcement]', e));
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  async function showAnnouncementIfAny() {
+    const { data, error } = await window.sla.db.from('announcements')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (error || !data || data.length === 0) return;
+
+    const ann = data[0];
+    const popupKey = `sla-ann-popup-${ann.id}`;
+    const bannerKey = `sla-ann-banner-${ann.id}`;
+
+    if (localStorage.getItem(bannerKey)) return; // fully dismissed
+    if (localStorage.getItem(popupKey)) {
+      renderBanner(ann);
+    } else {
+      // Delay slightly so intro animation can run first
+      setTimeout(() => renderPopup(ann), 2400);
+    }
+  }
+
+  function renderPopup(ann) {
+    const wrap = document.createElement('div');
+    wrap.className = 'sla-ann-popup';
+    wrap.innerHTML = `
+      <div class="sla-ann-popup-card">
+        <button class="sla-ann-close" aria-label="Dismiss">×</button>
+        <span class="sla-ann-eyebrow">Announcement</span>
+        <h2 class="sla-ann-title"></h2>
+        <p class="sla-ann-body"></p>
+        <a class="sla-ann-link" style="display: none;"></a>
+      </div>
+    `;
+    wrap.querySelector('.sla-ann-title').textContent = ann.title;
+    wrap.querySelector('.sla-ann-body').textContent = ann.body;
+    if (ann.link_url && ann.link_text) {
+      const a = wrap.querySelector('.sla-ann-link');
+      a.href = ann.link_url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = ann.link_text;
+      a.style.display = 'inline-flex';
+    }
+    document.body.appendChild(wrap);
+    requestAnimationFrame(() => wrap.classList.add('visible'));
+
+    const dismiss = () => {
+      localStorage.setItem(`sla-ann-popup-${ann.id}`, '1');
+      wrap.classList.remove('visible');
+      setTimeout(() => {
+        wrap.remove();
+        renderBanner(ann);
+      }, 400);
+    };
+    wrap.querySelector('.sla-ann-close').addEventListener('click', dismiss);
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) dismiss(); });
+  }
+
+  function renderBanner(ann) {
+    const bar = document.createElement('div');
+    bar.className = 'sla-ann-banner';
+    bar.innerHTML = `
+      <div class="sla-ann-banner-content">
+        <span class="sla-ann-banner-icon">📢</span>
+        <strong class="sla-ann-banner-title"></strong>
+        <span class="sla-ann-banner-sep">—</span>
+        <span class="sla-ann-banner-tap">tap to read</span>
+        <button class="sla-ann-banner-close" aria-label="Dismiss">×</button>
+      </div>
+    `;
+    bar.querySelector('.sla-ann-banner-title').textContent = ann.title;
+    document.body.appendChild(bar);
+    requestAnimationFrame(() => bar.classList.add('visible'));
+
+    bar.addEventListener('click', (e) => {
+      if (e.target.classList.contains('sla-ann-banner-close')) {
+        localStorage.setItem(`sla-ann-banner-${ann.id}`, '1');
+        bar.classList.remove('visible');
+        setTimeout(() => bar.remove(), 400);
+      } else {
+        // Re-open popup
+        bar.remove();
+        renderPopup(ann);
+      }
+    });
+  }
+})();

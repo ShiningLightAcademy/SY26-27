@@ -52,20 +52,20 @@
         <span class="icon">👥</span> <span>Admins</span>
       </a>
 
-      <div class="admin-nav-section">Content (coming soon)</div>
+      <div class="admin-nav-section">Content</div>
       <a href="#teachers" class="admin-nav-link disabled" data-view="teachers">
         <span class="icon">👨‍🏫</span> <span>Teachers</span>
       </a>
-      <a href="#announcements" class="admin-nav-link disabled" data-view="announcements">
+      <a href="#announcements" class="admin-nav-link" data-view="announcements">
         <span class="icon">📢</span> <span>Announcements</span>
       </a>
-      <a href="#schedule" class="admin-nav-link disabled" data-view="schedule">
+      <a href="#schedule" class="admin-nav-link" data-view="schedule">
         <span class="icon">📅</span> <span>Schedule</span>
       </a>
-      <a href="#classrooms" class="admin-nav-link disabled" data-view="classrooms">
+      <a href="#classrooms" class="admin-nav-link" data-view="classrooms">
         <span class="icon">🏫</span> <span>Classrooms</span>
       </a>
-      <a href="#portfolio" class="admin-nav-link disabled" data-view="portfolio">
+      <a href="#portfolio" class="admin-nav-link" data-view="portfolio">
         <span class="icon">🎨</span> <span>Portfolio</span>
       </a>
       <a href="#gallery" class="admin-nav-link disabled" data-view="gallery">
@@ -162,7 +162,7 @@
     <section class="admin-view" data-view="teachers">
       <header class="admin-view-head">
         <h1>Teachers</h1>
-        <p>Coming next — full CRUD for the teacher roster, including photo uploads.</p>
+        <p>Building next — full CRUD with photo uploads. Coming in the next round of updates.</p>
       </header>
       <div class="admin-placeholder">
         <p>This section will let you add, edit, and delete teacher cards, upload their photos, and set contact details. Until it's built, the placeholder cards on the public Teachers page stay as they are.</p>
@@ -172,35 +172,71 @@
     <section class="admin-view" data-view="announcements">
       <header class="admin-view-head">
         <h1>Announcements</h1>
-        <p>Coming next — compose popup messages that appear on the homepage.</p>
+        <p>Compose messages that appear as a popup on the public site. Dismissing the popup collapses it to a thin banner at the top.</p>
       </header>
-      <div class="admin-placeholder">
-        <p>This section will let you create and schedule announcements. When active, they show as a glass popup on first visit, then collapse to a thin banner if dismissed.</p>
+
+      <div class="admin-card">
+        <h3 id="ann-form-title">Create new announcement</h3>
+        <p class="admin-card-sub">Only one announcement is shown at a time on the public site. Marking a new one active deactivates others.</p>
+
+        <input type="hidden" id="ann-id" />
+        <div class="admin-form-row">
+          <input type="text" id="ann-title" placeholder="Title — e.g. Foundation Day on Friday" />
+        </div>
+        <div class="admin-form-row">
+          <textarea id="ann-body" placeholder="The full announcement text..." rows="3" style="flex: 1; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 10px; font-family: inherit; font-size: 0.92rem; resize: vertical;"></textarea>
+        </div>
+        <div class="admin-form-row">
+          <input type="text" id="ann-link-text" placeholder="Optional button label — e.g. RSVP here" />
+          <input type="url" id="ann-link-url" placeholder="Optional URL — https://..." />
+        </div>
+        <div class="admin-form-row" style="align-items: center; gap: 1rem;">
+          <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; cursor: pointer;">
+            <input type="checkbox" id="ann-active" /> Active (show on public site)
+          </label>
+          <div style="flex: 1;"></div>
+          <button id="ann-cancel" class="btn btn-ghost" style="display: none;">Cancel</button>
+          <button id="ann-save" class="btn btn-primary">Save</button>
+        </div>
+        <div id="ann-feedback" class="admin-feedback"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3>All announcements</h3>
+        <div id="ann-list" class="admin-list">
+          <div class="admin-empty">Loading…</div>
+        </div>
       </div>
     </section>
 
     <section class="admin-view" data-view="schedule">
       <header class="admin-view-head">
         <h1>Schedule</h1>
-        <p>Coming next — edit the Google Drive link for each grade's schedule.</p>
+        <p>Paste the Google Drive link for each grade's schedule. The link appears as a button on the public Schedule page.</p>
       </header>
-      <div class="admin-placeholder"><p>This section will replace the placeholder href="#" links on the Schedule page with real Drive URLs.</p></div>
+      <div id="schedule-editor" class="admin-card">
+        <div class="admin-empty">Loading…</div>
+      </div>
     </section>
 
     <section class="admin-view" data-view="classrooms">
       <header class="admin-view-head">
         <h1>Classrooms</h1>
-        <p>Coming next — edit the Google Classroom link and join code for each grade.</p>
+        <p>Paste each grade's Google Classroom invite link and (optionally) the join code as a fallback.</p>
       </header>
-      <div class="admin-placeholder"><p>This section will replace the placeholder href="#" links on the Classrooms page with real Classroom URLs and class codes.</p></div>
+      <div id="classrooms-editor" class="admin-card">
+        <div class="admin-empty">Loading…</div>
+      </div>
     </section>
 
     <section class="admin-view" data-view="portfolio">
       <header class="admin-view-head">
         <h1>Portfolio colors</h1>
-        <p>Coming next — change the subject color codes per grade level.</p>
+        <p>Each grade has a list of subjects with assigned colors. Click any subject to change its color, name, or label. Add new subjects below each grade.</p>
       </header>
-      <div class="admin-placeholder"><p>This section will let you visually pick the color, name, and label for each subject per grade.</p></div>
+      <div id="portfolio-editor">
+        <div class="admin-empty">Loading…</div>
+      </div>
     </section>
 
     <section class="admin-view" data-view="gallery">
