@@ -76,6 +76,8 @@
     if (name === 'classrooms')    return loadClassrooms();
     if (name === 'portfolio')     return loadPortfolio();
     if (name === 'teachers')      return loadTeachers();
+    if (name === 'gallery')       return loadGallery();
+    if (name === 'home-shuffle')  return loadHomeShuffle();
   }
 
   // ============================================================
@@ -708,5 +710,399 @@
       closeTeacherModal(); loadTeachers(); loadDashboard();
     } catch (e) { alert('Failed: ' + (e.message || e)); }
   });
+
+
+  // ============================================================
+  // GALLERY — Sets and photos
+  // ============================================================
+  async function loadGallery() {
+    const list = document.getElementById('gallery-sets-list');
+    list.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data: sets, error } = await window.sla.db
+      .from('gallery_sets').select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error) { list.innerHTML = `<div class="admin-empty">Failed: ${escapeHtml(error.message)}</div>`; return; }
+    if (!sets || sets.length === 0) {
+      list.innerHTML = '<div class="admin-empty">No gallery sets yet. Click "+ New set" to create one.</div>';
+      return;
+    }
+
+    // Count photos per set
+    const setIds = sets.map(s => s.id);
+    const { data: photos } = await window.sla.db
+      .from('gallery_photos').select('id, set_id').in('set_id', setIds);
+    const photoCount = {};
+    (photos || []).forEach(p => { photoCount[p.set_id] = (photoCount[p.set_id] || 0) + 1; });
+
+    list.innerHTML = sets.map(s => `
+      <div class="gset-card ${s.is_visible ? '' : 'gset-hidden'}" data-id="${s.id}">
+        <div class="gset-head">
+          <div>
+            <strong>${escapeHtml(s.title)}</strong>
+            <div class="meta">${escapeHtml(s.meta || '')}${s.event_date ? ' · ' + new Date(s.event_date).toLocaleDateString() : ''} · ${photoCount[s.id] || 0} photos${s.is_visible ? '' : ' · Hidden'}</div>
+          </div>
+          <div class="gset-actions">
+            <button class="gset-toggle" data-id="${s.id}">Manage photos ▾</button>
+            <button class="gset-edit" data-id="${s.id}">Edit</button>
+            <button class="gset-del" data-id="${s.id}">Delete</button>
+          </div>
+        </div>
+        <div class="gset-photos" id="gset-photos-${s.id}" hidden></div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.gset-toggle').forEach(btn => {
+      btn.addEventListener('click', () => toggleSetPhotos(btn.dataset.id, btn));
+    });
+    list.querySelectorAll('.gset-edit').forEach(btn => {
+      btn.addEventListener('click', () => editGallerySet(btn.dataset.id));
+    });
+    list.querySelectorAll('.gset-del').forEach(btn => {
+      btn.addEventListener('click', () => deleteGallerySet(btn.dataset.id));
+    });
+  }
+
+  async function toggleSetPhotos(setId, btn) {
+    const panel = document.getElementById('gset-photos-' + setId);
+    if (!panel.hidden) {
+      panel.hidden = true;
+      btn.textContent = 'Manage photos ▾';
+      return;
+    }
+    btn.textContent = 'Hide photos ▴';
+    panel.hidden = false;
+    panel.innerHTML = '<div class="admin-empty">Loading photos…</div>';
+
+    const { data: photos } = await window.sla.db
+      .from('gallery_photos').select('*')
+      .eq('set_id', setId)
+      .order('sort_order', { ascending: true });
+
+    panel.innerHTML = `
+      <div class="shuffle-dropzone" data-set-id="${setId}">
+        <input type="file" class="gset-file-input" accept="image/*" multiple hidden />
+        <span>Click or drop images to upload to this set</span>
+      </div>
+      <div class="gset-photo-status admin-feedback"></div>
+      <div class="gset-photo-grid">
+        ${(photos || []).map(p => `
+          <div class="gset-photo" data-id="${p.id}" draggable="true">
+            <img src="${escapeHtml(p.photo_url)}" alt="" />
+            <input type="text" class="gset-photo-caption" placeholder="Caption (optional)" value="${escapeHtml(p.caption || '')}" />
+            <div class="gset-photo-actions">
+              <button class="gset-photo-save">Save</button>
+              <button class="gset-photo-del">×</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    wireGsetPhotoControls(panel, setId);
+  }
+
+  function wireGsetPhotoControls(panel, setId) {
+    const dropzone = panel.querySelector('.shuffle-dropzone');
+    const input = dropzone.querySelector('.gset-file-input');
+    const status = panel.querySelector('.gset-photo-status');
+
+    dropzone.addEventListener('click', () => input.click());
+    ['dragenter', 'dragover'].forEach(ev => dropzone.addEventListener(ev, e => {
+      e.preventDefault(); dropzone.classList.add('dragging');
+    }));
+    ['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => {
+      e.preventDefault(); dropzone.classList.remove('dragging');
+    }));
+    dropzone.addEventListener('drop', e => uploadGalleryPhotos(e.dataTransfer.files, setId, status, panel));
+    input.addEventListener('change', e => uploadGalleryPhotos(e.target.files, setId, status, panel));
+
+    panel.querySelectorAll('.gset-photo-save').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const photo = btn.closest('.gset-photo');
+        const caption = photo.querySelector('.gset-photo-caption').value.trim() || null;
+        const { error } = await window.sla.db.from('gallery_photos').update({ caption }).eq('id', photo.dataset.id);
+        if (error) { alert('Failed: ' + error.message); return; }
+        btn.textContent = '✓';
+        setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+      });
+    });
+    panel.querySelectorAll('.gset-photo-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const photo = btn.closest('.gset-photo');
+        if (!confirm('Delete this photo?')) return;
+        const img = photo.querySelector('img');
+        if (img && img.src.includes('/storage/v1/object/public/sla-media/')) {
+          const path = img.src.split('/sla-media/').pop();
+          if (path) await window.sla.db.storage.from('sla-media').remove([path]).catch(() => {});
+        }
+        const { error } = await window.sla.db.from('gallery_photos').delete().eq('id', photo.dataset.id);
+        if (error) { alert('Failed: ' + error.message); return; }
+        photo.remove();
+        loadGallery(); // refresh counts
+      });
+    });
+
+    // Drag-to-reorder photos
+    wireGalleryPhotoDrag(panel, setId);
+  }
+
+  function wireGalleryPhotoDrag(panel, setId) {
+    let dragged = null;
+    panel.querySelectorAll('.gset-photo').forEach(card => {
+      card.addEventListener('dragstart', e => {
+        dragged = card;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        panel.querySelectorAll('.gset-photo').forEach(c => c.classList.remove('drop-target'));
+      });
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (card !== dragged) card.classList.add('drop-target');
+      });
+      card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
+      card.addEventListener('drop', async e => {
+        e.preventDefault();
+        card.classList.remove('drop-target');
+        if (!dragged || dragged === card) return;
+        const targetRect = card.getBoundingClientRect();
+        const dropAfter = (e.clientY - targetRect.top) > targetRect.height / 2
+                       || (e.clientX - targetRect.left) > targetRect.width / 2;
+        if (dropAfter) card.parentNode.insertBefore(dragged, card.nextSibling);
+        else card.parentNode.insertBefore(dragged, card);
+
+        const ids = Array.from(panel.querySelectorAll('.gset-photo')).map(c => c.dataset.id);
+        await Promise.all(ids.map((id, i) =>
+          window.sla.db.from('gallery_photos').update({ sort_order: i }).eq('id', id)
+        ));
+      });
+    });
+  }
+
+  async function uploadGalleryPhotos(files, setId, statusEl, panel) {
+    if (!files || !files.length) return;
+    const list = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (!list.length) { statusEl.textContent = 'No image files selected.'; statusEl.className = 'gset-photo-status admin-feedback error'; return; }
+
+    statusEl.className = 'gset-photo-status admin-feedback';
+    statusEl.textContent = `Uploading 0 of ${list.length}…`;
+
+    let uploaded = 0;
+    for (const file of list) {
+      if (file.size > 5 * 1024 * 1024) {
+        statusEl.textContent = `Skipping ${file.name} (over 5 MB)`;
+        continue;
+      }
+      try {
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const safeExt = ['jpg','jpeg','png','webp','gif'].includes(ext) ? ext : 'jpg';
+        const path = `gallery/${setId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${safeExt}`;
+        const { data, error } = await window.sla.db.storage.from('sla-media').upload(path, file, { cacheControl:'3600', upsert:false, contentType:file.type });
+        if (error) throw error;
+        const { data: urlData } = window.sla.db.storage.from('sla-media').getPublicUrl(data.path);
+        await window.sla.db.from('gallery_photos').insert({
+          set_id: setId, photo_url: urlData.publicUrl, sort_order: 999,
+        });
+        uploaded++;
+        statusEl.textContent = `Uploading ${uploaded} of ${list.length}…`;
+      } catch (e) {
+        console.error('[upload]', file.name, e);
+        statusEl.textContent = `Error: ${e.message}`;
+        statusEl.className = 'gset-photo-status admin-feedback error';
+      }
+    }
+    statusEl.textContent = `✓ Uploaded ${uploaded} of ${list.length}.`;
+    statusEl.className = 'gset-photo-status admin-feedback success';
+    // Refresh the panel
+    const btn = panel.closest('.gset-card').querySelector('.gset-toggle');
+    panel.hidden = true;
+    toggleSetPhotos(setId, btn);
+    loadGallery(); // update counts
+  }
+
+  // Create / edit set modal (lightweight inline prompts)
+  async function editGallerySet(id) {
+    let title, meta, eventDate, isVisible = true;
+    if (id) {
+      const { data } = await window.sla.db.from('gallery_sets').select('*').eq('id', id).single();
+      if (!data) return;
+      title = data.title; meta = data.meta || ''; eventDate = data.event_date || ''; isVisible = data.is_visible;
+    } else {
+      title = ''; meta = ''; eventDate = '';
+    }
+    const newTitle = prompt('Title (e.g. "Foundation Day 2024"):', title);
+    if (newTitle === null) return;
+    const newMeta = prompt('Subtitle / Description (optional):', meta) || '';
+    const newDate = prompt('Date (YYYY-MM-DD, optional):', eventDate) || '';
+
+    const payload = {
+      title: newTitle.trim() || 'Untitled set',
+      meta: newMeta.trim() || null,
+      event_date: newDate.trim() || null,
+      is_visible: isVisible,
+    };
+    const result = id
+      ? await window.sla.db.from('gallery_sets').update(payload).eq('id', id)
+      : await window.sla.db.from('gallery_sets').insert(payload);
+    if (result.error) { alert('Failed: ' + result.error.message); return; }
+    loadGallery();
+  }
+
+  async function deleteGallerySet(id) {
+    if (!confirm('Delete this gallery set? All its photos will also be deleted.')) return;
+    // Delete photo files from storage
+    const { data: photos } = await window.sla.db.from('gallery_photos').select('photo_url').eq('set_id', id);
+    const paths = (photos || [])
+      .map(p => p.photo_url)
+      .filter(u => u.includes('/storage/v1/object/public/sla-media/'))
+      .map(u => u.split('/sla-media/').pop())
+      .filter(Boolean);
+    if (paths.length) await window.sla.db.storage.from('sla-media').remove(paths).catch(() => {});
+    const { error } = await window.sla.db.from('gallery_sets').delete().eq('id', id);
+    if (error) { alert('Failed: ' + error.message); return; }
+    loadGallery();
+  }
+
+  document.addEventListener('click', e => {
+    if (e.target && e.target.id === 'gset-add-btn') editGallerySet(null);
+  });
+
+
+  // ============================================================
+  // HOME SHUFFLE — Images for the rotating card on homepage
+  // ============================================================
+  async function loadHomeShuffle() {
+    const grid = document.getElementById('shuffle-grid');
+    grid.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data, error } = await window.sla.db.from('home_shuffle_images')
+      .select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true });
+    if (error) { grid.innerHTML = `<div class="admin-empty">Failed: ${escapeHtml(error.message)}</div>`; return; }
+
+    if (!data || !data.length) {
+      grid.innerHTML = '<div class="admin-empty">No images yet. Upload some above.</div>';
+    } else {
+      grid.innerHTML = data.map(img => `
+        <div class="shuffle-admin-card${img.is_visible ? '' : ' hidden-shuffle'}" data-id="${img.id}" draggable="true">
+          <img src="${escapeHtml(img.image_url)}" alt="" />
+          <input type="text" class="shuffle-caption" placeholder="Caption (shown on card)" value="${escapeHtml(img.caption || '')}" />
+          <div class="shuffle-card-actions">
+            <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem;">
+              <input type="checkbox" class="shuffle-visible" ${img.is_visible ? 'checked' : ''} /> Show
+            </label>
+            <button class="shuffle-save">Save</button>
+            <button class="shuffle-del">×</button>
+          </div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.shuffle-save').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const card = btn.closest('.shuffle-admin-card');
+          const fields = {
+            caption: card.querySelector('.shuffle-caption').value.trim() || null,
+            is_visible: card.querySelector('.shuffle-visible').checked,
+          };
+          const { error } = await window.sla.db.from('home_shuffle_images').update(fields).eq('id', card.dataset.id);
+          if (error) { alert('Failed: ' + error.message); return; }
+          btn.textContent = '✓';
+          setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+          card.classList.toggle('hidden-shuffle', !fields.is_visible);
+        });
+      });
+      grid.querySelectorAll('.shuffle-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const card = btn.closest('.shuffle-admin-card');
+          if (!confirm('Delete this image?')) return;
+          const img = card.querySelector('img');
+          if (img && img.src.includes('/storage/v1/object/public/sla-media/')) {
+            const path = img.src.split('/sla-media/').pop();
+            if (path) await window.sla.db.storage.from('sla-media').remove([path]).catch(() => {});
+          }
+          const { error } = await window.sla.db.from('home_shuffle_images').delete().eq('id', card.dataset.id);
+          if (error) { alert('Failed: ' + error.message); return; }
+          loadHomeShuffle();
+        });
+      });
+
+      // Drag reorder
+      let dragged = null;
+      grid.querySelectorAll('.shuffle-admin-card').forEach(card => {
+        card.addEventListener('dragstart', e => { dragged = card; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', card.dataset.id); });
+        card.addEventListener('dragend', () => { card.classList.remove('dragging'); grid.querySelectorAll('.shuffle-admin-card').forEach(c => c.classList.remove('drop-target')); });
+        card.addEventListener('dragover', e => { e.preventDefault(); if (card !== dragged) card.classList.add('drop-target'); });
+        card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
+        card.addEventListener('drop', async e => {
+          e.preventDefault();
+          card.classList.remove('drop-target');
+          if (!dragged || dragged === card) return;
+          const rect = card.getBoundingClientRect();
+          const after = (e.clientY - rect.top) > rect.height / 2 || (e.clientX - rect.left) > rect.width / 2;
+          if (after) card.parentNode.insertBefore(dragged, card.nextSibling);
+          else card.parentNode.insertBefore(dragged, card);
+          const ids = Array.from(grid.querySelectorAll('.shuffle-admin-card')).map(c => c.dataset.id);
+          await Promise.all(ids.map((id, i) =>
+            window.sla.db.from('home_shuffle_images').update({ sort_order: i }).eq('id', id)
+          ));
+        });
+      });
+    }
+
+    // Wire up the dropzone (only needs wiring once, but easier to re-wire each load)
+    const dropzone = document.getElementById('shuffle-drop');
+    const fileInput = document.getElementById('shuffle-file-input');
+    const status = document.getElementById('shuffle-upload-status');
+
+    // Remove existing listeners by cloning
+    const newDropzone = dropzone.cloneNode(true);
+    dropzone.parentNode.replaceChild(newDropzone, dropzone);
+    const newInput = document.getElementById('shuffle-file-input');
+
+    newDropzone.addEventListener('click', () => newInput.click());
+    ['dragenter','dragover'].forEach(ev => newDropzone.addEventListener(ev, e => { e.preventDefault(); newDropzone.classList.add('dragging'); }));
+    ['dragleave','drop'].forEach(ev => newDropzone.addEventListener(ev, e => { e.preventDefault(); newDropzone.classList.remove('dragging'); }));
+    newDropzone.addEventListener('drop', e => uploadShuffleImages(e.dataTransfer.files, status));
+    newInput.addEventListener('change', e => uploadShuffleImages(e.target.files, status));
+  }
+
+  async function uploadShuffleImages(files, statusEl) {
+    if (!files || !files.length) return;
+    const list = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (!list.length) { statusEl.textContent = 'No image files.'; statusEl.className = 'admin-feedback error'; return; }
+    statusEl.className = 'admin-feedback';
+    statusEl.textContent = `Uploading 0 of ${list.length}…`;
+
+    let uploaded = 0;
+    for (const file of list) {
+      if (file.size > 5 * 1024 * 1024) { statusEl.textContent = `Skipping ${file.name}: over 5 MB`; continue; }
+      try {
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const safeExt = ['jpg','jpeg','png','webp','gif'].includes(ext) ? ext : 'jpg';
+        const path = `home-shuffle/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${safeExt}`;
+        const { data, error } = await window.sla.db.storage.from('sla-media').upload(path, file, { cacheControl:'3600', upsert:false, contentType:file.type });
+        if (error) throw error;
+        const { data: urlData } = window.sla.db.storage.from('sla-media').getPublicUrl(data.path);
+        await window.sla.db.from('home_shuffle_images').insert({
+          image_url: urlData.publicUrl, sort_order: 999, is_visible: true,
+        });
+        uploaded++;
+        statusEl.textContent = `Uploading ${uploaded} of ${list.length}…`;
+      } catch (e) {
+        console.error('[shuffle-upload]', file.name, e);
+        statusEl.textContent = `Error: ${e.message}`;
+        statusEl.className = 'admin-feedback error';
+      }
+    }
+    statusEl.textContent = `✓ Uploaded ${uploaded} of ${list.length}.`;
+    statusEl.className = 'admin-feedback success';
+    loadHomeShuffle();
+  }
+
 
 })();

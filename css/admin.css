@@ -968,3 +968,145 @@
   15%, 85% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(8px); }
 }
+
+
+/* ============================================================
+   GALLERY ADMIN
+   ============================================================ */
+.gset-card {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.gset-card.gset-hidden { opacity: 0.65; }
+
+.gset-head {
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.gset-head strong {
+  font-weight: 600;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--text-soft);
+}
+.gset-head .meta {
+  font-size: 0.78rem;
+  color: var(--text-mute);
+}
+.gset-actions { display: flex; gap: 0.4rem; }
+.gset-actions button {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: white;
+  color: var(--text-soft);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gset-actions button:hover { background: rgba(0,0,0,0.04); }
+.gset-actions .gset-toggle { background: var(--text-soft); color: white; border-color: var(--text-soft); }
+.gset-actions .gset-toggle:hover { background: var(--ink); }
+.gset-actions .gset-del { color: #DC2626; }
+.gset-actions .gset-del:hover { background: #FEE2E2; }
+
+.gset-photos {
+  padding: 0 1.4rem 1.4rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.gset-photos[hidden] { display: none !important; }
+
+.shuffle-dropzone {
+  margin-top: 1rem;
+  padding: 2rem;
+  text-align: center;
+  border: 2px dashed rgba(0,0,0,0.15);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.02);
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-mute);
+  transition: all 0.2s var(--ease);
+}
+.shuffle-dropzone:hover { border-color: var(--text-soft); background: rgba(0,0,0,0.04); }
+.shuffle-dropzone.dragging { border-color: var(--gold); background: rgba(188, 139, 58, 0.08); color: var(--text-soft); }
+
+.gset-photo-grid, .shuffle-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+.gset-photo, .shuffle-admin-card {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+  transition: all 0.2s var(--ease);
+}
+.gset-photo:hover, .shuffle-admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.gset-photo img, .shuffle-admin-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  pointer-events: none;
+}
+.gset-photo-caption, .shuffle-caption {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  font-family: inherit;
+  font-size: 0.82rem;
+  background: white;
+}
+.gset-photo-caption:focus, .shuffle-caption:focus {
+  outline: none;
+  background: rgba(0,0,0,0.02);
+}
+.gset-photo-actions, .shuffle-card-actions {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  align-items: center;
+  justify-content: space-between;
+}
+.gset-photo-actions button, .shuffle-card-actions button {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gset-photo-actions .gset-photo-save, .shuffle-card-actions .shuffle-save {
+  background: var(--text-soft);
+  color: white;
+  border-color: var(--text-soft);
+}
+.gset-photo-actions .gset-photo-del, .shuffle-card-actions .shuffle-del {
+  color: #DC2626;
+}
+
+.gset-photo.dragging, .shuffle-admin-card.dragging { opacity: 0.4; }
+.gset-photo.drop-target, .shuffle-admin-card.drop-target {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(188, 139, 58, 0.25);
+}
+.shuffle-admin-card.hidden-shuffle { opacity: 0.55; }

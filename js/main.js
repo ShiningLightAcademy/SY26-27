@@ -69,16 +69,28 @@
 })();
 
 // ============================================================
-// CARD SHUFFLE
+// CARD SHUFFLE — Re-initializable so the homepage fetcher can
+// replace static cards with DB-driven ones and call init() again.
 // ============================================================
-(function () {
+window.initCardShuffle = function () {
   const stage = document.querySelector('[data-shuffle-stage]');
   if (!stage) return;
   const cards = Array.from(stage.querySelectorAll('.shuffle-card'));
+  if (cards.length === 0) return;
+
+  // Clear any previous auto-rotate timer
+  if (window._shuffleTimer) clearInterval(window._shuffleTimer);
+
+  // Clone prev/next buttons to discard old listeners
+  ['[data-shuffle-prev]', '[data-shuffle-next]'].forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) el.replaceWith(el.cloneNode(true));
+  });
+
   const counter = document.querySelector('[data-shuffle-counter]');
   const prevBtn = document.querySelector('[data-shuffle-prev]');
   const nextBtn = document.querySelector('[data-shuffle-next]');
-  if (cards.length === 0) return;
+
   let current = 0;
   function update() {
     cards.forEach((card, i) => {
@@ -106,11 +118,18 @@
   cards.forEach((card, i) => {
     card.addEventListener('click', () => { if (i !== current) { current = i; update(); } else next(); });
   });
-  let autoTimer = setInterval(next, 5000);
-  stage.addEventListener('mouseenter', () => clearInterval(autoTimer));
-  stage.addEventListener('mouseleave', () => { autoTimer = setInterval(next, 5000); });
+  window._shuffleTimer = setInterval(next, 5000);
+  stage.addEventListener('mouseenter', () => clearInterval(window._shuffleTimer));
+  stage.addEventListener('mouseleave', () => { window._shuffleTimer = setInterval(next, 5000); });
   update();
-})();
+};
+
+// Auto-init on DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', window.initCardShuffle);
+} else {
+  window.initCardShuffle();
+}
 
 // ============================================================
 // GALLERY CAROUSELS

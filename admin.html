@@ -68,10 +68,13 @@
       <a href="#portfolio" class="admin-nav-link" data-view="portfolio">
         <span class="icon">🎨</span> <span>Portfolio</span>
       </a>
-      <a href="#gallery" class="admin-nav-link disabled" data-view="gallery">
+      <a href="#gallery" class="admin-nav-link" data-view="gallery">
         <span class="icon">🖼️</span> <span>Gallery</span>
       </a>
-    </nav>
+    <a href="#home-shuffle" class="admin-nav-link" data-view="home-shuffle">
+        <span class="icon">🎴</span> <span>Home Shuffle</span>
+      </a>
+      </nav>
 
     <div class="admin-foot">
       <div class="admin-user">
@@ -251,9 +254,46 @@
     <section class="admin-view" data-view="gallery">
       <header class="admin-view-head">
         <h1>Gallery</h1>
-        <p>Coming next — upload and arrange photos into the masonry collages.</p>
+        <p>Each set becomes its own section on the public Gallery page with one carousel. Drag photos into a set to upload them.</p>
       </header>
-      <div class="admin-placeholder"><p>This section will let you create gallery sets, upload photos (max 5MB each), arrange them into collage cells with size variants, and reorder them by drag.</p></div>
+
+      <div class="admin-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div>
+          <h3 style="margin-bottom: 0.2rem;">Sets</h3>
+          <p class="admin-card-sub" style="margin-bottom: 0;">Click any set to manage its photos. Hidden sets don't appear publicly.</p>
+        </div>
+        <button id="gset-add-btn" class="btn btn-primary">+ New set</button>
+      </div>
+
+      <div id="gallery-sets-list" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="admin-empty">Loading…</div>
+      </div>
+    </section>
+
+    <!-- HOME SHUFFLE view -->
+    <section class="admin-view" data-view="home-shuffle">
+      <header class="admin-view-head">
+        <h1>Home Shuffle</h1>
+        <p>The images that rotate in the showcase card on the homepage. Add, hide, reorder, or change captions.</p>
+      </header>
+
+      <div class="admin-card">
+        <h3>Upload images</h3>
+        <p class="admin-card-sub">Drop one or many. Max 5 MB each. JPG, PNG, or WEBP.</p>
+        <div id="shuffle-drop" class="shuffle-dropzone">
+          <input type="file" id="shuffle-file-input" accept="image/*" multiple hidden />
+          <span>Click or drop images here to upload</span>
+        </div>
+        <div id="shuffle-upload-status" class="admin-feedback"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3>Current shuffle images</h3>
+        <p class="admin-card-sub">Drag to reorder. Click any image to edit its caption.</p>
+        <div id="shuffle-grid" class="shuffle-admin-grid">
+          <div class="admin-empty">Loading…</div>
+        </div>
+      </div>
     </section>
   </main>
 </div>
