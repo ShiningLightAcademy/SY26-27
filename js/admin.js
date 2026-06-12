@@ -85,6 +85,7 @@
     if (name === 'schedule') return loadSchedule();
     if (name === 'classrooms') return loadClassrooms();
     if (name === 'portfolio') return loadPortfolio();
+    if (name === 'teachers') return loadTeachers();
   }
 
   async function loadDashboard() {
@@ -751,7 +752,306 @@
         if (!confirm('Delete this subject?')) return;
         const { error } = await window.sla.db.from('portfolio_subjects')
           .delete().eq('id', row.dataset.id);
-        if (error) { alert('Failed: ' + error.message); return; }
+        if (error) { alert('Failed: ' + error.message); retur
+  // ============================================================
+  // TEACHERS — CRUD with photo upload
+  // ============================================================
+  async function loadTeachers() {
+    const grid = document.getElementById('teachers-grid');
+    grid.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+    const { data, error } = await window.sla.db.from('teachers')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      grid.innerHTML = `<div class="admin-empty">Failed: ${escapeHtml(error.message)}</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<div class="admin-empty">No teachers yet. Click "+ Add teacher" to add the first one.</div>';
+      return;
+    }
+
+    grid.innerHTML = data.map(t => {
+      const initial = (t.full_name || '?').charAt(0).toUpperCase();
+      const photoHtml = t.photo_url
+        ? `<img src="${escapeHtml(t.photo_url)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'), {textContent: '${initial}', style: 'font-family: var(--font-display); font-size: 2.2rem; font-weight: 600;'}))" />`
+        : escapeHtml(initial);
+      return `
+        <div class="teacher-admin-card ${t.is_visible ? '' : 'hidden-teacher'}" data-id="${t.id}">
+          <div class="teacher-admin-photo">${photoHtml}</div>
+          <div class="teacher-admin-info">
+            <strong>${escapeHtml(t.full_name)}</strong>
+            <div class="meta">${escapeHtml(t.role || 'No role set')}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.teacher-admin-card').forEach(card => {
+      card.addEventListener('click', () => openTeacherModal(card.dataset.id));
+    });
+  }
+
+  // ---- Modal management ----
+  const teacherModal = document.getElementById('teacher-modal');
+  let currentPhotoFile = null;
+  let currentPhotoUrl = null;
+
+  function openTeacherModal(id) {
+    resetTeacherForm();
+    if (id) {
+      document.getElementById('teacher-modal-title').textContent = 'Edit teacher';
+      document.getElementById('teacher-delete-btn').style.display = 'inline-flex';
+      loadTeacherIntoForm(id);
+    } else {
+      document.getElementById('teacher-modal-title').textContent = 'Add teacher';
+      document.getElementById('teacher-delete-btn').style.display = 'none';
+    }
+    teacherModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTeacherModal() {
+    teacherModal.hidden = true;
+    document.body.style.overflow = '';
+    resetTeacherForm();
+  }
+
+  function resetTeacherForm() {
+    document.getElementById('teacher-id').value = '';
+    document.getElementById('teacher-name').value = '';
+    document.getElementById('teacher-role').value = '';
+    document.getElementById('teacher-email').value = '';
+    document.getElementById('teacher-whatsapp').value = '';
+    document.getElementById('teacher-tm').value = '';
+    document.getElementById('teacher-globe').value = '';
+    document.getElementById('teacher-zoom').value = '';
+    document.getElementById('teacher-meetingid').value = '';
+    document.getElementById('teacher-passcode').value = '';
+    document.getElementById('teacher-sort').value = '0';
+    document.getElementById('teacher-visible').checked = true;
+    document.getElementById('teacher-photo-url').value = '';
+    document.getElementById('teacher-photo-input').value = '';
+    document.getElementById('teacher-photo-preview').innerHTML =
+      '<span class="teacher-photo-hint">Click or drop image</span>';
+    document.getElementById('teacher-photo-clear').style.display = 'none';
+    const fb = document.getElementById('teacher-form-feedback');
+    fb.textContent = '';
+    fb.className = 'admin-feedback';
+    currentPhotoFile = null;
+    currentPhotoUrl = null;
+  }
+
+  async function loadTeacherIntoForm(id) {
+    const { data: t, error } = await window.sla.db.from('teachers')
+      .select('*').eq('id', id).single();
+    if (error || !t) return;
+    document.getElementById('teacher-id').value = t.id;
+    document.getElementById('teacher-name').value = t.full_name || '';
+    document.getElementById('teacher-role').value = t.role || '';
+    document.getElementById('teacher-email').value = t.email || '';
+    document.getElementById('teacher-whatsapp').value = t.whatsapp || '';
+    document.getElementById('teacher-tm').value = t.tm_smart || '';
+    document.getElementById('teacher-globe').value = t.globe || '';
+    document.getElementById('teacher-zoom').value = t.zoom_link || '';
+    document.getElementById('teacher-meetingid').value = t.meeting_id || '';
+    document.getElementById('teacher-passcode').value = t.passcode || '';
+    document.getElementById('teacher-sort').value = t.sort_order || 0;
+    document.getElementById('teacher-visible').checked = !!t.is_visible;
+    if (t.photo_url) {
+      currentPhotoUrl = t.photo_url;
+      document.getElementById('teacher-photo-preview').innerHTML = `<img src="${escapeHtml(t.photo_url)}" alt="" />`;
+      document.getElementById('teacher-photo-clear').style.display = 'inline-flex';
+    }
+  }
+
+  // Wire up modal triggers
+  document.getElementById('teacher-add-btn').addEventListener('click', () => openTeacherModal(null));
+  document.getElementById('teacher-modal-close').addEventListener('click', closeTeacherModal);
+  document.getElementById('teacher-cancel-btn').addEventListener('click', closeTeacherModal);
+  teacherModal.addEventListener('click', (e) => {
+    if (e.target === teacherModal) closeTeacherModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !teacherModal.hidden) closeTeacherModal();
+  });
+
+  // Photo upload — file picker + drag-and-drop
+  const photoArea = document.querySelector('.teacher-photo-area');
+  const photoInput = document.getElementById('teacher-photo-input');
+  const photoPreview = document.getElementById('teacher-photo-preview');
+  const photoUrlInput = document.getElementById('teacher-photo-url');
+  const photoClear = document.getElementById('teacher-photo-clear');
+
+  function handlePhotoFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      alert('Please drop an image file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be under 5 MB. Storage policy limit.');
+      return;
+    }
+    currentPhotoFile = file;
+    currentPhotoUrl = null;
+    photoUrlInput.value = '';
+    // Show preview from local file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      photoPreview.innerHTML = `<img src="${e.target.result}" alt="" />`;
+      photoClear.style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  photoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handlePhotoFile(file);
+  });
+  ['dragenter', 'dragover'].forEach(ev => {
+    photoArea.addEventListener(ev, (e) => {
+      e.preventDefault();
+      photoArea.classList.add('dragging');
+    });
+  });
+  ['dragleave', 'drop'].forEach(ev => {
+    photoArea.addEventListener(ev, (e) => {
+      e.preventDefault();
+      photoArea.classList.remove('dragging');
+    });
+  });
+  photoArea.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) handlePhotoFile(file);
+  });
+
+  // Paste an external URL
+  photoUrlInput.addEventListener('input', () => {
+    const url = photoUrlInput.value.trim();
+    if (url && /^https?:\/\//.test(url)) {
+      currentPhotoUrl = url;
+      currentPhotoFile = null;
+      photoPreview.innerHTML = `<img src="${escapeHtml(url)}" alt="" />`;
+      photoClear.style.display = 'inline-flex';
+    }
+  });
+
+  photoClear.addEventListener('click', () => {
+    currentPhotoFile = null;
+    currentPhotoUrl = null;
+    photoUrlInput.value = '';
+    photoInput.value = '';
+    photoPreview.innerHTML = '<span class="teacher-photo-hint">Click or drop image</span>';
+    photoClear.style.display = 'none';
+  });
+
+  async function uploadPhotoToStorage(file) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const safeExt = ['jpg','jpeg','png','webp','gif'].includes(ext) ? ext : 'jpg';
+    const path = `teachers/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${safeExt}`;
+    const { data, error } = await window.sla.db.storage.from('sla-media').upload(path, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type,
+    });
+    if (error) throw error;
+    const { data: urlData } = window.sla.db.storage.from('sla-media').getPublicUrl(data.path);
+    return urlData.publicUrl;
+  }
+
+  // Save
+  document.getElementById('teacher-save-btn').addEventListener('click', async () => {
+    const fb = document.getElementById('teacher-form-feedback');
+    fb.className = 'admin-feedback';
+    fb.textContent = '';
+
+    const name = document.getElementById('teacher-name').value.trim();
+    if (!name) {
+      fb.classList.add('error');
+      fb.textContent = 'Full name is required.';
+      return;
+    }
+
+    const saveBtn = document.getElementById('teacher-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      let photoUrl = currentPhotoUrl;
+      if (currentPhotoFile) {
+        photoArea.classList.add('teacher-uploading');
+        photoUrl = await uploadPhotoToStorage(currentPhotoFile);
+        photoArea.classList.remove('teacher-uploading');
+      }
+
+      const payload = {
+        full_name: name,
+        role: document.getElementById('teacher-role').value.trim() || null,
+        email: document.getElementById('teacher-email').value.trim() || null,
+        whatsapp: document.getElementById('teacher-whatsapp').value.trim() || null,
+        tm_smart: document.getElementById('teacher-tm').value.trim() || null,
+        globe: document.getElementById('teacher-globe').value.trim() || null,
+        zoom_link: document.getElementById('teacher-zoom').value.trim() || null,
+        meeting_id: document.getElementById('teacher-meetingid').value.trim() || null,
+        passcode: document.getElementById('teacher-passcode').value.trim() || null,
+        sort_order: parseInt(document.getElementById('teacher-sort').value) || 0,
+        is_visible: document.getElementById('teacher-visible').checked,
+        photo_url: photoUrl,
+      };
+
+      const id = document.getElementById('teacher-id').value;
+      let result;
+      if (id) {
+        result = await window.sla.db.from('teachers').update(payload).eq('id', id);
+      } else {
+        result = await window.sla.db.from('teachers').insert(payload);
+      }
+      if (result.error) throw result.error;
+
+      closeTeacherModal();
+      loadTeachers();
+      loadDashboard();
+    } catch (e) {
+      photoArea.classList.remove('teacher-uploading');
+      fb.classList.add('error');
+      fb.textContent = 'Failed: ' + (e.message || e);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  });
+
+  // Delete
+  document.getElementById('teacher-delete-btn').addEventListener('click', async () => {
+    const id = document.getElementById('teacher-id').value;
+    if (!id) return;
+    const name = document.getElementById('teacher-name').value;
+    if (!confirm(`Delete ${name}? This cannot be undone. The photo file will also be removed from storage.`)) return;
+
+    try {
+      // Try to delete the photo file from storage if it's hosted by us
+      const photoUrl = currentPhotoUrl;
+      if (photoUrl && photoUrl.includes('/storage/v1/object/public/sla-media/')) {
+        const path = photoUrl.split('/sla-media/').pop();
+        if (path) {
+          await window.sla.db.storage.from('sla-media').remove([path]).catch(() => {});
+        }
+      }
+      const { error } = await window.sla.db.from('teachers').delete().eq('id', id);
+      if (error) throw error;
+      closeTeacherModal();
+      loadTeachers();
+      loadDashboard();
+    } catch (e) {
+      alert('Failed: ' + (e.message || e));
+    }
+  });
+
+
+n; }
         loadPortfolio();
       });
     });

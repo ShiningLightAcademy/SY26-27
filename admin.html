@@ -53,7 +53,7 @@
       </a>
 
       <div class="admin-nav-section">Content</div>
-      <a href="#teachers" class="admin-nav-link disabled" data-view="teachers">
+      <a href="#teachers" class="admin-nav-link" data-view="teachers">
         <span class="icon">👨‍🏫</span> <span>Teachers</span>
       </a>
       <a href="#announcements" class="admin-nav-link" data-view="announcements">
@@ -162,10 +162,19 @@
     <section class="admin-view" data-view="teachers">
       <header class="admin-view-head">
         <h1>Teachers</h1>
-        <p>Building next — full CRUD with photo uploads. Coming in the next round of updates.</p>
+        <p>Manage the teacher roster shown on the public Teachers page. Photos upload to your secure storage bucket. Hidden teachers don't appear publicly.</p>
       </header>
-      <div class="admin-placeholder">
-        <p>This section will let you add, edit, and delete teacher cards, upload their photos, and set contact details. Until it's built, the placeholder cards on the public Teachers page stay as they are.</p>
+
+      <div class="admin-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div>
+          <h3 style="margin-bottom: 0.2rem;">Roster</h3>
+          <p class="admin-card-sub" style="margin-bottom: 0;">Click any teacher to edit. Drag to reorder later — for now use the sort number.</p>
+        </div>
+        <button id="teacher-add-btn" class="btn btn-primary">+ Add teacher</button>
+      </div>
+
+      <div id="teachers-grid" class="teachers-admin-grid">
+        <div class="admin-empty">Loading…</div>
       </div>
     </section>
 
@@ -247,6 +256,86 @@
       <div class="admin-placeholder"><p>This section will let you create gallery sets, upload photos (max 5MB each), arrange them into collage cells with size variants, and reorder them by drag.</p></div>
     </section>
   </main>
+</div>
+
+
+<!-- Teacher edit modal -->
+<div id="teacher-modal" class="admin-modal" hidden>
+  <div class="admin-modal-content" style="max-width: 720px;">
+    <button class="admin-modal-close" id="teacher-modal-close" aria-label="Close">×</button>
+    <h2 id="teacher-modal-title" style="font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; margin-bottom: 0.4rem; letter-spacing: -0.015em;">Add teacher</h2>
+    <p style="color: var(--text-mute); font-size: 0.88rem; margin-bottom: 1.5rem;">All fields except name are optional. Hidden teachers don't appear on the public page.</p>
+
+    <input type="hidden" id="teacher-id" />
+
+    <div class="teacher-form-grid">
+      <!-- Photo upload -->
+      <div class="teacher-photo-uploader">
+        <label class="teacher-photo-area" for="teacher-photo-input">
+          <div id="teacher-photo-preview" class="teacher-photo-preview">
+            <span class="teacher-photo-hint">Click or drop image</span>
+          </div>
+          <input type="file" id="teacher-photo-input" accept="image/*" hidden />
+        </label>
+        <button id="teacher-photo-clear" type="button" class="btn btn-ghost" style="display: none; margin-top: 0.5rem; font-size: 0.78rem; padding: 0.4rem 0.8rem;">Remove photo</button>
+        <input type="url" id="teacher-photo-url" placeholder="…or paste image URL" />
+      </div>
+
+      <!-- Text fields -->
+      <div class="teacher-form-fields">
+        <label>Full name <span class="required">*</span>
+          <input type="text" id="teacher-name" required />
+        </label>
+        <label>Role / Subject
+          <input type="text" id="teacher-role" placeholder="e.g. Grade 4 Adviser · Mathematics" />
+        </label>
+        <div class="form-row">
+          <label>Email
+            <input type="email" id="teacher-email" placeholder="name@slasm.net" />
+          </label>
+          <label>WhatsApp
+            <input type="text" id="teacher-whatsapp" placeholder="+63 9XX XXX XXXX" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>TM/Smart
+            <input type="text" id="teacher-tm" />
+          </label>
+          <label>Globe
+            <input type="text" id="teacher-globe" />
+          </label>
+        </div>
+        <label>Zoom link
+          <input type="url" id="teacher-zoom" placeholder="https://zoom.us/j/..." />
+        </label>
+        <div class="form-row">
+          <label>Meeting ID
+            <input type="text" id="teacher-meetingid" />
+          </label>
+          <label>Passcode
+            <input type="text" id="teacher-passcode" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Sort order
+            <input type="number" id="teacher-sort" value="0" />
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <input type="checkbox" id="teacher-visible" checked /> Visible on public site
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="teacher-form-feedback" class="admin-feedback"></div>
+
+    <div class="teacher-form-actions">
+      <button id="teacher-delete-btn" class="btn btn-ghost danger" style="display: none;">Delete</button>
+      <div style="flex: 1;"></div>
+      <button id="teacher-cancel-btn" class="btn btn-ghost">Cancel</button>
+      <button id="teacher-save-btn" class="btn btn-primary">Save</button>
+    </div>
+  </div>
 </div>
 
 <script src="js/admin.js"></script>
