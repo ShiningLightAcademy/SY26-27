@@ -459,7 +459,65 @@
       });
     });
   }
+   
+/* ============================================================
+   SHINING LIGHT ACADEMY — Public Teachers Roster Logic
+   ============================================================ */
 
+async function loadPublicTeachers() {
+  // 1. Target the blank container div where your cards should go
+  const grid = document.getElementById('public-teachers-grid'); 
+  
+  if (!grid) return; // Exit if we aren't on the teachers page
+
+  try {
+    // 2. Fetch the data from Supabase, filtering out hidden teachers
+    const { data, error } = await window.sla.db
+      .from('teachers')
+      .select('*')
+      .eq('is_visible', true) // Only grab visible teachers
+      .order('sort_order', { ascending: true }) // Keep your custom sorting
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      grid.innerHTML = '<p>No teachers to display right now.</p>';
+      return;
+    }
+
+    // 3. Map the data to your public HTML design
+    grid.innerHTML = data.map(t => {
+      const initial = (t.full_name || '?').charAt(0).toUpperCase();
+      
+      // Check if they have a photo, otherwise show an initial
+      const photoHtml = t.photo_url 
+        ? `<img src="${t.photo_url}" alt="${t.full_name}" loading="lazy" />` 
+        : `<div class="placeholder-avatar">${initial}</div>`;
+
+      // Customize these class names to match your existing CSS!
+      return `
+        <div class="public-teacher-card">
+          <div class="teacher-photo-wrapper">
+            ${photoHtml}
+          </div>
+          <div class="teacher-info">
+            <h3>${t.full_name}</h3>
+            <p class="teacher-role">${t.role || 'Faculty'}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error("[Public Teachers] Failed to load roster:", error);
+    grid.innerHTML = '<p>Oops! Failed to load the teacher roster. Please try again later.</p>';
+  }
+}
+
+// 4. Run the function as soon as the public page loads
+document.addEventListener('DOMContentLoaded', loadPublicTeachers);
+   
   // ============================================================
   // TEACHERS
   // ============================================================
