@@ -759,40 +759,54 @@
   async function loadTeachers() {
     const grid = document.getElementById('teachers-grid');
     grid.innerHTML = '<div class="admin-empty">Loading…</div>';
+    console.log('[teachers] starting query…');
 
-    const { data, error } = await window.sla.db.from('teachers')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: true });
+    try {
+      // Race the query against an 8s timeout so we never hang silently
+      const queryPromise = window.sla.db.from('teachers')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Query timed out (>8s). Likely network or auth issue.')), 8000)
+      );
 
-    if (error) {
-      grid.innerHTML = `<div class="admin-empty">Failed: ${escapeHtml(error.message)}</div>`;
-      return;
-    }
-    if (!data || data.length === 0) {
-      grid.innerHTML = '<div class="admin-empty">No teachers yet. Click "+ Add teacher" to add the first one.</div>';
-      return;
-    }
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+      const { data, error } = result;
+      console.log('[teachers] query result:', { data, error });
 
-    grid.innerHTML = data.map(t => {
-      const initial = (t.full_name || '?').charAt(0).toUpperCase();
-      const photoHtml = t.photo_url
-        ? `<img src="${escapeHtml(t.photo_url)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'), {textContent: '${initial}', style: 'font-family: var(--font-display); font-size: 2.2rem; font-weight: 600;'}))" />`
-        : escapeHtml(initial);
-      return `
-        <div class="teacher-admin-card ${t.is_visible ? '' : 'hidden-teacher'}" data-id="${t.id}">
-          <div class="teacher-admin-photo">${photoHtml}</div>
-          <div class="teacher-admin-info">
-            <strong>${escapeHtml(t.full_name)}</strong>
-            <div class="meta">${escapeHtml(t.role || 'No role set')}</div>
+      if (error) {
+        grid.innerHTML = `<div class="admin-empty" style="color:#DC2626;">Database error: ${escapeHtml(error.message || JSON.stringify(error))}</div>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        grid.innerHTML = '<div class="admin-empty">No teachers yet. Click "+ Add teacher" to add the first one.</div>';
+        return;
+      }
+
+      grid.innerHTML = data.map(t => {
+        const initial = (t.full_name || '?').charAt(0).toUpperCase();
+        const photoHtml = t.photo_url
+          ? `<img src="${escapeHtml(t.photo_url)}" alt="" loading="lazy" />`
+          : `<span>${escapeHtml(initial)}</span>`;
+        return `
+          <div class="teacher-admin-card ${t.is_visible ? '' : 'hidden-teacher'}" data-id="${t.id}">
+            <div class="teacher-admin-photo">${photoHtml}</div>
+            <div class="teacher-admin-info">
+              <strong>${escapeHtml(t.full_name)}</strong>
+              <div class="meta">${escapeHtml(t.role || 'No role set')}</div>
+            </div>
           </div>
-        </div>
-      `;
-    }).join('');
+        `;
+      }).join('');
 
-    grid.querySelectorAll('.teacher-admin-card').forEach(card => {
-      card.addEventListener('click', () => openTeacherModal(card.dataset.id));
-    });
+      grid.querySelectorAll('.teacher-admin-card').forEach(card => {
+        card.addEventListener('click', () => openTeacherModal(card.dataset.id));
+      });
+    } catch (e) {
+      console.error('[teachers] error:', e);
+      grid.innerHTML = `<div class="admin-empty" style="color:#DC2626;">Error: ${escapeHtml(e.message || String(e))}<br><br><small>Open browser DevTools (F12) → Console tab and screenshot any red errors. Share with Claude.</small></div>`;
+    }
   }
 
   // ---- Modal management ----
