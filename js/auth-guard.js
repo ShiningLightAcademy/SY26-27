@@ -1,11 +1,10 @@
 /* ============================================================
    SHINING LIGHT ACADEMY — Auth Guard
    ============================================================
-   Include on every page EXCEPT login.html.
-   Load order in <head>:
-     1. @supabase/supabase-js (CDN)
-     2. js/supabase-client.js
-     3. js/auth-guard.js   <-- this file
+   Checks auth on every protected page.
+   Injects a compact user-menu pill into #nav-user-menu,
+   keeping it separate from the main nav links so mobile
+   hamburger menu stays clean.
    ============================================================ */
 
 (async () => {
@@ -14,7 +13,6 @@
     return;
   }
 
-  // Helper to build absolute URL to a file in the current folder
   function relUrl(filename) {
     const base = window.location.pathname.replace(/[^/]*$/, '');
     return window.location.origin + base + filename;
@@ -28,56 +26,76 @@
   }
 
   if (!session) {
-    // Not signed in — bounce to login. Replace (no history entry).
     window.location.replace(relUrl('login.html'));
     return;
   }
 
-  // Signed in. Touch presence asynchronously — don't block rendering.
-  window.sla.touchPresence().catch(err => console.warn('[SLA] touchPresence:', err));
+  // Touch presence async — don't block rendering
+  window.sla.touchPresence().catch(() => {});
 
-  // Inject the sign-out link + maybe an admin link into the nav.
-  function injectNavExtras() {
-    const navLinks = document.querySelector('.nav-links');
-    if (!navLinks) return;
-    if (navLinks.querySelector('.sla-signout-link')) return; // already injected
+  // ----------------------------------------------------------------
+  // Build the user-menu pill and inject it into #nav-user-menu
+  // ----------------------------------------------------------------
+  async function injectUserMenu() {
+    const slot = document.getElementById('nav-user-menu');
+    if (!slot) return;
 
-    // Admin link (only visible to admins) — added before sign-out
-    window.sla.isAdmin().then(admin => {
-      if (admin && !navLinks.querySelector('.sla-admin-link')) {
-        const liAdmin = document.createElement('li');
-        const aAdmin = document.createElement('a');
-        aAdmin.href = relUrl('admin.html');
-        aAdmin.textContent = 'Admin';
-        aAdmin.className = 'sla-admin-link';
-        liAdmin.appendChild(aAdmin);
-        navLinks.insertBefore(liAdmin, navLinks.lastElementChild);
-      }
-    }).catch(() => {});
+    // Get profile for display name + admin check
+    const [profile, isAdmin] = await Promise.all([
+      window.sla.getProfile().catch(() => null),
+      window.sla.isAdmin().catch(() => false),
+    ]);
+
+    const displayName = profile
+      ? (profile.full_name ? profile.full_name.split(' ')[0] : profile.email.split('@')[0])
+      : '…';
+    const initial = displayName.charAt(0).toUpperCase();
+
+    // Build the menu
+    slot.innerHTML = `
+      <div class="nav-user-pill" id="nav-user-pill">
+        <span class="nav-user-avatar">${initial}</span>
+        <span class="nav-user-name">${escHtml(displayName)}</span>
+        <span class="nav-user-chevron">▾</span>
+      </div>
+      <div class="nav-user-dropdown" id="nav-user-dropdown" hidden>
+        ${isAdmin ? `<a href="${relUrl('admin.html')}" class="nav-user-item">⚙️ Admin panel</a>` : ''}
+        <button class="nav-user-item nav-user-signout" id="nav-signout-btn">Sign out</button>
+      </div>
+    `;
+    slot.hidden = false;
+
+    // Toggle dropdown
+    const pill = document.getElementById('nav-user-pill');
+    const dropdown = document.getElementById('nav-user-dropdown');
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.hidden = !dropdown.hidden;
+    });
+    // Close on outside click
+    document.addEventListener('click', () => { if (dropdown) dropdown.hidden = true; });
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dropdown) dropdown.hidden = true;
+    });
 
     // Sign out
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.href = '#';
-    a.textContent = 'Sign out';
-    a.className = 'sla-signout-link';
-    a.addEventListener('click', async (e) => {
+    document.getElementById('nav-signout-btn').addEventListener('click', async (e) => {
       e.preventDefault();
-      try {
-        await window.sla.signOut();
-      } catch (err) {
-        console.error('[SLA] sign out failed:', err);
-        // Fallback: force redirect even if signOut errored
-        window.location.href = relUrl('login.html');
-      }
+      try { await window.sla.signOut(); }
+      catch (err) { window.location.href = relUrl('login.html'); }
     });
-    li.appendChild(a);
-    navLinks.appendChild(li);
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectNavExtras);
+    document.addEventListener('DOMContentLoaded', injectUserMenu, { once: true });
   } else {
-    injectNavExtras();
+    injectUserMenu();
   }
 })();

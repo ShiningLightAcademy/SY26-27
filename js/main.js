@@ -7,10 +7,33 @@
   const nav = document.querySelector('.nav');
   const navToggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
+
   if (navToggle && navLinks) {
-    navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
-    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+    // Toggle the mobile menu
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navLinks.classList.toggle('open');
+      // Animate the hamburger bars
+      navToggle.classList.toggle('open');
+    });
+
+    // Use event delegation so dynamically-injected links also close the menu
+    navLinks.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') {
+        navLinks.classList.remove('open');
+        navToggle.classList.remove('open');
+      }
+    });
+
+    // Close mobile menu if clicking anywhere outside
+    document.addEventListener('click', (e) => {
+      if (!nav || !nav.contains(e.target)) {
+        navLinks.classList.remove('open');
+        navToggle.classList.remove('open');
+      }
+    });
   }
+
   if (nav) {
     const updateNav = () => {
       if (window.scrollY > 10) nav.classList.add('scrolled');
@@ -19,10 +42,14 @@
     updateNav();
     window.addEventListener('scroll', updateNav, { passive: true });
   }
+
+  // Mark active page link
   const currentPath = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-links a').forEach(link => {
     const href = link.getAttribute('href');
-    if (href === currentPath || (currentPath === '' && href === 'index.html')) link.classList.add('active');
+    if (href === currentPath || (currentPath === '' && href === 'index.html')) {
+      link.classList.add('active');
+    }
   });
 })();
 

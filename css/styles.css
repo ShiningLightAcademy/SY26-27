@@ -2668,47 +2668,147 @@ body:has(.sla-ann-banner.visible) {
 
 
 /* ============================================================
-   NAV OVERFLOW FIX — auth-injected items styled subtly
-   so the 9-item nav doesn't wrap awkwardly
+   NAV — Compact, no-overflow. Auth is in the user-menu pill.
    ============================================================ */
+
+/* Remove the flex-wrap + row-gap we added earlier — no longer needed */
 .nav-links {
-  flex-wrap: wrap;
-  row-gap: 0.25rem;
+  flex-wrap: nowrap;
+  row-gap: 0;
 }
 .nav-links a {
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.85rem;
   font-size: 0.8rem;
+  white-space: nowrap;
 }
 
-/* Visually demote the auth-injected links so they don't compete with main nav */
-.nav-links li:has(.sla-admin-link),
-.nav-links li:has(.sla-signout-link) {
-  margin-left: 0.3rem;
-}
-.nav-links li:has(.sla-signout-link)::before {
-  content: '';
-  display: inline-block;
-  width: 1px;
-  height: 16px;
-  background: rgba(0, 29, 61, 0.18);
-  margin-right: 0.4rem;
-  vertical-align: middle;
-}
-.sla-admin-link,
-.sla-signout-link {
-  font-size: 0.74rem !important;
-  padding: 0.35rem 0.7rem !important;
-  opacity: 0.65 !important;
-  letter-spacing: 0.01em;
-}
-.sla-admin-link:hover,
-.sla-signout-link:hover {
-  opacity: 1 !important;
+/* Remove the old auth-injected link overrides — no longer used */
+.sla-admin-link, .sla-signout-link { display: none !important; }
+
+/* ============================================================
+   USER MENU PILL — sits at the right of nav, desktop + mobile
+   ============================================================ */
+.nav-user-menu {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
 }
 
-/* Slightly tighten the nav-brand on smaller widths */
-@media (max-width: 980px) {
+.nav-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 0.75rem 0.38rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(0, 29, 61, 0.08);
+  border: 1px solid rgba(0, 29, 61, 0.12);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  transition: all 0.25s var(--ease);
+  user-select: none;
+  white-space: nowrap;
+}
+.nav-user-pill:hover {
+  background: rgba(0, 29, 61, 0.14);
+  border-color: rgba(0, 29, 61, 0.2);
+}
+
+.nav-user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--navy));
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.nav-user-name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-user-chevron {
+  font-size: 0.65rem;
+  opacity: 0.55;
+  margin-left: -0.1rem;
+}
+
+.nav-user-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 180px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 29, 61, 0.14), 0 4px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+  z-index: 200;
+  animation: dropdownIn 0.2s var(--ease-emphasis);
+}
+.nav-user-dropdown[hidden] { display: none !important; }
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.nav-user-item {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-decoration: none;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s var(--ease);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.nav-user-item:last-child { border-bottom: none; }
+.nav-user-item:hover { background: rgba(0, 29, 61, 0.04); }
+.nav-user-signout { color: #B91C1C; }
+.nav-user-signout:hover { background: #FEF2F2; }
+
+/* Mobile: pill moves to sit next to hamburger */
+@media (max-width: 833px) {
+  .nav-user-name { display: none; }
+  .nav-user-chevron { display: none; }
+  .nav-user-pill { padding: 0.35rem; }
+  .nav-user-avatar { width: 28px; height: 28px; font-size: 0.78rem; }
+  .nav-user-dropdown {
+    right: 0;
+    top: calc(100% + 0.4rem);
+  }
+}
+
+/* Hamburger → X animation when open */
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+/* Mobile nav overlay must sit above the user-menu dropdown */
+@media (max-width: 833px) {
+  .nav-links {
+    z-index: 150;
+  }
+  /* Slightly tighter font on nav brand for narrow screens */
   .nav-brand span {
-    font-size: 0.82rem;
+    font-size: 0.85rem;
   }
 }
