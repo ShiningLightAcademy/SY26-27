@@ -9,12 +9,15 @@
   const navLinks = document.querySelector('.nav-links');
 
   if (navToggle && navLinks) {
+    function syncLock() {
+      document.body.classList.toggle('nav-open', navLinks.classList.contains('open'));
+    }
     // Toggle the mobile menu
     navToggle.addEventListener('click', (e) => {
       e.stopPropagation();
       navLinks.classList.toggle('open');
-      // Animate the hamburger bars
       navToggle.classList.toggle('open');
+      syncLock();
     });
 
     // Use event delegation so dynamically-injected links also close the menu
@@ -22,6 +25,7 @@
       if (e.target.tagName === 'A') {
         navLinks.classList.remove('open');
         navToggle.classList.remove('open');
+        syncLock();
       }
     });
 
@@ -30,6 +34,7 @@
       if (!nav || !nav.contains(e.target)) {
         navLinks.classList.remove('open');
         navToggle.classList.remove('open');
+        syncLock();
       }
     });
   }
