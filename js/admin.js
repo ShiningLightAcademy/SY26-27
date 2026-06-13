@@ -107,9 +107,10 @@
     junior_high: 'Junior High School', senior_high: 'Senior High School',
   };
   const PORTFOLIO_GRADES = [
-    'Nursery','Kindergarten','Grade 1','Grade 2','Grade 3','Grade 4',
-    'Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10',
-    'Grade 11 Academic Track','Grade 11 TVL','Grade 12 STEM','Grade 12 HUMSS'
+    'Nursery','Kinder','Grade 1','Grade 2-3','Grade 4-6','Grade 7-10',
+    'Grade 11 Academic Track','Grade 11 TVL',
+    'Grade 12 STEM (1st Sem)','Grade 12 STEM (2nd Sem)',
+    'Grade 12 HUMSS (1st Sem)','Grade 12 HUMSS (2nd Sem)'
   ];
 
   // ============================================================
@@ -483,8 +484,11 @@
     const groups = {};
     PORTFOLIO_GRADES.forEach(g => { groups[g] = []; });
     (data || []).forEach(r => { if (!groups[r.grade_level]) groups[r.grade_level] = []; groups[r.grade_level].push(r); });
+    // Render the known grades first, then any extra grades found in the DB
+    const extraGrades = Object.keys(groups).filter(g => !PORTFOLIO_GRADES.includes(g));
+    const renderGrades = [...PORTFOLIO_GRADES, ...extraGrades];
     editor.innerHTML = `<div class="admin-card"><div id="portfolio-grades">
-      ${PORTFOLIO_GRADES.map(grade => {
+      ${renderGrades.map(grade => {
         const subjects = groups[grade] || [];
         return `<div class="portfolio-grade-block" data-grade="${escapeHtml(grade)}">
           <h4>${escapeHtml(grade)} <span class="meta">(${subjects.length} subjects)</span></h4>
