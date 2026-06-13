@@ -97,6 +97,20 @@
         <p>Welcome back, <span id="welcome-name">admin</span>.</p>
       </header>
 
+      <div class="admin-card main-admin-only visibility-card" id="visibility-card" hidden>
+        <div class="visibility-row">
+          <div class="visibility-text">
+            <h3>Site visibility</h3>
+            <p class="admin-card-sub">When this is off, only admins can view the site. Everyone else sees a maintenance screen.</p>
+          </div>
+          <label class="switch" title="Toggle site visibility">
+            <input type="checkbox" id="visibility-toggle" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+        <div id="visibility-status" class="visibility-status">Loading…</div>
+      </div>
+
       <div class="admin-stats">
         <div class="admin-stat">
           <div class="admin-stat-num" id="stat-users">—</div>

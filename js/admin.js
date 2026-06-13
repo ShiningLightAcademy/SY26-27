@@ -115,11 +115,60 @@
   // ============================================================
   // DASHBOARD
   // ============================================================
+  // ============================================================
+  // SITE VISIBILITY — main-admin-only maintenance switch
+  // ============================================================
+  let _visibilityWired = false;
+  async function wireVisibility(isMainAdmin) {
+    const card = document.getElementById('visibility-card');
+    if (!card) return;
+    if (!isMainAdmin) { card.hidden = true; return; }
+    card.hidden = false;
+
+    const toggle = document.getElementById('visibility-toggle');
+    const status = document.getElementById('visibility-status');
+
+    function paint(visible) {
+      toggle.checked = visible;
+      card.classList.toggle('is-hidden-mode', !visible);
+      status.textContent = visible
+        ? 'Site is live — everyone can view it.'
+        : 'Maintenance mode — only admins can view the site right now.';
+    }
+
+    // Load current value
+    try {
+      const { data } = await window.sla.db.from('site_settings').select('public_visible').eq('id', 1).single();
+      paint(data ? !!data.public_visible : true);
+    } catch (e) { paint(true); }
+
+    if (_visibilityWired) return; // only attach the listener once
+    _visibilityWired = true;
+
+    toggle.addEventListener('change', async () => {
+      const visible = toggle.checked;
+      status.textContent = 'Saving…';
+      const { error } = await window.sla.db
+        .from('site_settings')
+        .update({ public_visible: visible, updated_at: new Date().toISOString(), updated_by: profile.id })
+        .eq('id', 1);
+      if (error) {
+        status.textContent = 'Could not save: ' + error.message;
+        toggle.checked = !visible; // revert
+        return;
+      }
+      paint(visible);
+    });
+  }
+
   async function loadDashboard() {
     const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
     try {
       // Active users count and recent activity are main-admin-only
       const isMainAdmin = !!profile.is_main_admin;
+
+      // Site visibility switch (main admin only)
+      wireVisibility(isMainAdmin);
 
       const queries = [
         // Always fetch for all admins:

@@ -34,6 +34,64 @@
   window.sla.touchPresence().catch(() => {});
 
   // ----------------------------------------------------------------
+  // Site visibility gate (maintenance mode)
+  // When public_visible = false, only admins may view the site.
+  // ----------------------------------------------------------------
+  let _isAdmin = false, _visible = true;
+  try {
+    const [adminRes, settingsRes] = await Promise.all([
+      window.sla.isAdmin().catch(() => false),
+      window.sla.db.from('site_settings').select('public_visible').eq('id', 1).single(),
+    ]);
+    _isAdmin = adminRes;
+    if (settingsRes && settingsRes.data && typeof settingsRes.data.public_visible === 'boolean') {
+      _visible = settingsRes.data.public_visible;
+    }
+  } catch (e) {
+    // Fail open — if the flag can't be read, show the site
+    console.warn('[SLA auth-guard] visibility check failed, showing site:', e);
+  }
+
+  if (!_visible && !_isAdmin) {
+    showMaintenance();
+    return; // stop here — member cannot browse
+  }
+  if (!_visible && _isAdmin) {
+    showAdminHiddenBanner();
+  }
+
+  function showMaintenance() {
+    const o = document.createElement('div');
+    o.className = 'sla-maintenance';
+    o.innerHTML = `
+      <div class="sla-maintenance-card">
+        <img src="${relUrl('images/sla-logo.svg')}" alt="" class="sla-maintenance-logo" />
+        <h1>We'll be right back</h1>
+        <p>The Shining Light Academy site is briefly unavailable while we make some updates. Please check again soon.</p>
+        <button class="sla-maintenance-signout" id="sla-maint-signout">Sign out</button>
+      </div>`;
+    document.documentElement.appendChild(o);
+    document.body.style.overflow = 'hidden';
+    const btn = document.getElementById('sla-maint-signout');
+    if (btn) btn.addEventListener('click', async () => {
+      try { await window.sla.signOut(); }
+      catch (err) { window.location.href = relUrl('login.html'); }
+    });
+  }
+
+  function showAdminHiddenBanner() {
+    function add() {
+      if (document.querySelector('.sla-hidden-banner')) return;
+      const bn = document.createElement('div');
+      bn.className = 'sla-hidden-banner';
+      bn.innerHTML = `<span>Maintenance mode is ON — the site is hidden from non-admins. You can see it because you're an admin.</span>`;
+      document.body.appendChild(bn);
+    }
+    if (document.body) add();
+    else document.addEventListener('DOMContentLoaded', add, { once: true });
+  }
+
+  // ----------------------------------------------------------------
   // Build the user-menu pill and inject it into #nav-user-menu
   // ----------------------------------------------------------------
   async function injectUserMenu() {
