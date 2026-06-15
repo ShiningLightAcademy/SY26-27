@@ -559,9 +559,13 @@ body.nav-open { overflow: hidden; }
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.8rem 1.05rem;
+  position: relative;
+  padding: 0.8rem 2rem 0.8rem 1.05rem;
   border-radius: 16px;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
   background: linear-gradient(150deg, rgba(255,255,255,0.15), rgba(255,255,255,0.035));
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
@@ -571,20 +575,43 @@ body.nav-open { overflow: hidden; }
   transform: translateY(16px) scale(0.97);
   animation: badgePop 0.7s var(--ease-emphasis) forwards;
   animation-delay: calc(1.0s + var(--i) * 0.13s);
-  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.hero-badge::after {
+  content: "\2197";
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--gold-lt);
+  opacity: 0.4;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.hero-badge:hover, .hero-badge:focus-visible {
+  transform: translateY(-3px) scale(1);
+  border-color: rgba(240,214,140,0.5);
+  background: linear-gradient(150deg, rgba(255,255,255,0.24), rgba(255,255,255,0.07));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 20px 40px rgba(0,16,38,0.46);
+}
+.hero-badge:hover::after, .hero-badge:focus-visible::after {
+  opacity: 0.95;
+  transform: translate(2px, -2px);
 }
 @keyframes badgePop { to { opacity: 1; transform: translateY(0) scale(1); } }
 .hero-badge-ico {
   width: 44px; height: 44px;
   flex: none;
-  display: grid; place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 13px;
   background: linear-gradient(150deg, rgba(240,214,140,0.24), rgba(200,155,60,0.10));
   border: 1px solid rgba(240,214,140,0.42);
   color: var(--gold-lt);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
 }
-.hero-badge-ico svg { width: 22px; height: 22px; }
+.hero-badge-ico svg { width: 22px; height: 22px; display: block; }
 .hero-badge strong {
   display: block;
   font-family: var(--font-text);
@@ -621,10 +648,8 @@ body.nav-open { overflow: hidden; }
     animation-delay: calc(1.0s + var(--i) * 0.13s),
                      calc(1.9s + var(--i) * 0.5s);
   }
-  .hero-badge:hover {
-    transform: translateY(-2px);
-    border-color: rgba(240,214,140,0.45);
-    background: linear-gradient(150deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
+  .hero-badge:hover, .hero-badge:focus-visible {
+    animation-play-state: paused;
   }
   @keyframes badgeFloat {
     0%, 100% { transform: translateY(0); }
