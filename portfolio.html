@@ -108,7 +108,7 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
   const ORDER = ['Nursery','Kinder','Grade 1','Grade 2-3','Grade 4-6','Grade 7-10',
-    'Grade 11 Academic Track','Grade 11 TVL',
+    'Grade 11',
     'Grade 12 STEM (1st Sem)','Grade 12 STEM (2nd Sem)',
     'Grade 12 HUMSS (1st Sem)','Grade 12 HUMSS (2nd Sem)'];
   function rank(g){ const i=ORDER.indexOf(g); if(i>=0) return i; if(/grade 11/i.test(g)) return 6.5; if(/grade 12/i.test(g)) return 11.5; return 999; }
@@ -124,24 +124,33 @@
     }
     const byGrade = {};
     data.forEach(r => { (byGrade[r.grade_level] = byGrade[r.grade_level] || []).push(r); });
-    const grades = Object.keys(byGrade).sort((a,b)=>{ const ra=rank(a), rb=rank(b); return ra!==rb ? ra-rb : a.localeCompare(b); });
+    // Always show the planned grade structure (ORDER) plus any extra grades in the DB.
+    // Grades with no subjects yet (e.g. Grade 11) still appear with a "to be announced" note.
+    const grades = Array.from(new Set([...ORDER, ...Object.keys(byGrade)]))
+      .sort((a,b)=>{ const ra=rank(a), rb=rank(b); return ra!==rb ? ra-rb : a.localeCompare(b); });
 
-    listEl.innerHTML = grades.map((grade, idx) => `
+    listEl.innerHTML = grades.map((grade, idx) => {
+      const subjects = byGrade[grade] || [];
+      const body = subjects.length
+        ? subjects.map(s => `
+              <div class="portfolio-subject">
+                <span class="portfolio-chip" style="background:${esc(s.color_hex)};"></span>
+                ${esc(s.subject_name)}
+                ${s.color_label ? `<span class="portfolio-chip-label">${esc(s.color_label)}</span>` : ''}
+              </div>`).join('')
+        : '<div class="portfolio-soon">Subjects and color codes to be announced.</div>';
+      return `
       <div class="portfolio-item${idx===0?' open':''}">
         <button class="portfolio-header" type="button">
           <span>${esc(grade)}</span>
         </button>
         <div class="portfolio-body">
           <div class="portfolio-subjects">
-            ${byGrade[grade].map(s => `
-              <div class="portfolio-subject">
-                <span class="portfolio-chip" style="background:${esc(s.color_hex)};"></span>
-                ${esc(s.subject_name)}
-                ${s.color_label ? `<span class="portfolio-chip-label">${esc(s.color_label)}</span>` : ''}
-              </div>`).join('')}
+            ${body}
           </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     listEl.querySelectorAll('.portfolio-header').forEach(btn => {
       btn.addEventListener('click', () => {

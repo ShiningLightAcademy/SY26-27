@@ -108,7 +108,7 @@
   };
   const PORTFOLIO_GRADES = [
     'Nursery','Kinder','Grade 1','Grade 2-3','Grade 4-6','Grade 7-10',
-    'Grade 11 Academic Track','Grade 11 TVL',
+    'Grade 11',
     'Grade 12 STEM (1st Sem)','Grade 12 STEM (2nd Sem)',
     'Grade 12 HUMSS (1st Sem)','Grade 12 HUMSS (2nd Sem)'
   ];

@@ -202,12 +202,13 @@ section { padding-block: clamp(3.75rem, 9vw, 7rem); }
   background: rgba(251, 248, 241, 0.82);
   backdrop-filter: saturate(160%) blur(18px);
   -webkit-backdrop-filter: saturate(160%) blur(18px);
-  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 5px 22px rgba(0, 32, 74, 0.06);
   transition: box-shadow 0.4s var(--ease), background 0.4s var(--ease);
 }
 .nav.scrolled {
   background: rgba(251, 248, 241, 0.94);
-  box-shadow: 0 6px 24px rgba(0, 32, 74, 0.06);
+  box-shadow: 0 8px 28px rgba(0, 32, 74, 0.11);
 }
 .nav-inner {
   max-width: var(--max-width);
@@ -1240,6 +1241,7 @@ body.nav-open { overflow: hidden; }
   font-weight: 500;
 }
 .portfolio-chip { width: 14px; height: 14px; border-radius: 50%; flex: none; border: 1px solid rgba(0,0,0,0.18); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25); }
+.portfolio-soon { padding: 0.4rem 0.2rem; color: var(--text-mute); font-style: italic; font-size: 0.9rem; }
 .portfolio-chip-label { font-size: 0.74rem; color: var(--text-mute); }
 
 /* ============================================================
