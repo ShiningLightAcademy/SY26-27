@@ -199,24 +199,27 @@ section { padding-block: clamp(3.75rem, 9vw, 7rem); }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(251, 248, 241, 0.85);
-  backdrop-filter: saturate(160%) blur(18px);
-  -webkit-backdrop-filter: saturate(160%) blur(18px);
-  border-radius: 0 0 20px 20px;
-  transition: box-shadow 0.4s var(--ease), background 0.4s var(--ease);
-}
-.nav.scrolled {
-  background: rgba(251, 248, 241, 0.95);
-  box-shadow: 0 6px 20px rgba(0, 32, 74, 0.07);
+  padding: 0.5rem clamp(0.6rem, 2.5vw, 1.5rem) 0;
+  background: transparent;
 }
 .nav-inner {
   max-width: var(--max-width);
   margin-inline: auto;
-  min-height: 62px;
-  padding: 0 var(--gutter);
+  min-height: 60px;
+  padding: 0 0.6rem 0 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
+  background: rgba(251, 248, 241, 0.86);
+  backdrop-filter: saturate(170%) blur(20px);
+  -webkit-backdrop-filter: saturate(170%) blur(20px);
+  border: 1px solid rgba(0, 32, 74, 0.07);
+  border-radius: 16px;
+  transition: background 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+.nav.scrolled .nav-inner {
+  background: rgba(251, 248, 241, 0.95);
+  box-shadow: 0 8px 26px rgba(0, 32, 74, 0.10);
 }
 .nav-brand {
   display: flex;
@@ -237,11 +240,11 @@ section { padding-block: clamp(3.75rem, 9vw, 7rem); }
    the panel to the nav bar's height). */
 .nav-links {
   position: fixed;
-  top: 61px;
+  top: 72px;
   left: 0; right: 0;
   bottom: auto;
   height: auto;
-  max-height: calc(100dvh - 61px);
+  max-height: calc(100dvh - 72px);
   display: flex;
   flex-direction: column;
   gap: 0;
