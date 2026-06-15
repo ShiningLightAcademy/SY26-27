@@ -199,16 +199,15 @@ section { padding-block: clamp(3.75rem, 9vw, 7rem); }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(251, 248, 241, 0.82);
+  background: rgba(251, 248, 241, 0.85);
   backdrop-filter: saturate(160%) blur(18px);
   -webkit-backdrop-filter: saturate(160%) blur(18px);
-  border-radius: 0 0 22px 22px;
-  box-shadow: 0 5px 22px rgba(0, 32, 74, 0.06);
+  border-radius: 0 0 20px 20px;
   transition: box-shadow 0.4s var(--ease), background 0.4s var(--ease);
 }
 .nav.scrolled {
-  background: rgba(251, 248, 241, 0.94);
-  box-shadow: 0 8px 28px rgba(0, 32, 74, 0.11);
+  background: rgba(251, 248, 241, 0.95);
+  box-shadow: 0 6px 20px rgba(0, 32, 74, 0.07);
 }
 .nav-inner {
   max-width: var(--max-width);
