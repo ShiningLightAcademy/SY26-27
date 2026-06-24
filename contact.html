@@ -39,7 +39,7 @@
       <div class="page-hero-icon"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
       <div class="page-hero-text">
         <span class="t-eyebrow" data-content-key="contact.eyebrow">Contact</span>
-        <h1 data-content-key="contact.title">Send us a <span class="accent">word.</span></h1>
+        <h1><span data-content-key="contact.title">Send us a</span> <span class="accent" data-content-key="contact.title_accent">word.</span></h1>
         <p data-content-key="contact.subtitle">Questions about enrollment, partnerships, or anything else — reach out through the form or any of the channels listed here.</p>
       </div>
     </div>
@@ -53,19 +53,19 @@
 
       <div class="contact-info reveal-left">
         <div class="contact-item">
-          <label>Address</label>
+          <label data-content-key="contact.label_address">Address</label>
           <p>Centro 1, Zamora Street<br />(Along Dammang Road)<br />Sanchez-Mira, Cagayan Valley<br />Philippines</p>
         </div>
         <div class="contact-item">
-          <label>Email</label>
+          <label data-content-key="contact.label_email">Email</label>
           <p><a href="mailto:sla@slasm.net">sla@slasm.net</a></p>
         </div>
         <div class="contact-item">
-          <label>Phone</label>
+          <label data-content-key="contact.label_phone">Phone</label>
           <p><a href="tel:+639173117351">+63 917 311 7351</a></p>
         </div>
         <div class="contact-item">
-          <label>Follow Us</label>
+          <label data-content-key="contact.label_follow">Follow Us</label>
           <p><a href="https://www.facebook.com/ShiningLightAcademySM" target="_blank" rel="noopener">Facebook → @ShiningLightAcademySM</a></p>
         </div>
       </div>
@@ -147,12 +147,12 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
 </script>
 <footer class="footer">
   <div class="container">
-    <div class="footer-top">
+    <div class="footer-top" data-content-key="footer.intro">
       Shining Light Academy is a private Christian school serving Cagayan Valley since 2011. Information on this site is for the SLA community.
     </div>
     <div class="footer-grid">
       <div>
-        <h5>School</h5>
+        <h5 data-content-key="footer.head_school">School</h5>
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="teachers.html">Teachers</a></li>
@@ -160,7 +160,7 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
         </ul>
       </div>
       <div>
-        <h5>Academics</h5>
+        <h5 data-content-key="footer.head_academics">Academics</h5>
         <ul>
           <li><a href="schedule.html">Schedule</a></li>
           <li><a href="classrooms.html">Classrooms</a></li>
@@ -168,7 +168,7 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
         </ul>
       </div>
       <div>
-        <h5>Reach Us</h5>
+        <h5 data-content-key="footer.head_reach">Reach Us</h5>
         <ul>
           <li><a href="contact.html">Contact</a></li>
           <li><a href="mailto:sla@slasm.net">sla@slasm.net</a></li>
@@ -176,11 +176,11 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
         </ul>
       </div>
       <div>
-        <h5>Address</h5>
+        <h5 data-content-key="footer.head_address">Address</h5>
         <ul>
-          <li>Centro 1, Zamora Street</li>
-          <li>Sanchez-Mira, Cagayan</li>
-          <li>Philippines</li>
+          <li data-content-key="footer.addr_line1">Centro 1, Zamora Street</li>
+          <li data-content-key="footer.addr_line2">Sanchez-Mira, Cagayan</li>
+          <li data-content-key="footer.addr_line3">Philippines</li>
         </ul>
       </div>
     </div>
