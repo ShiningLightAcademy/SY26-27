@@ -1257,3 +1257,64 @@
 @media (prefers-reduced-motion: reduce) {
   .online-dot { animation: none; }
 }
+
+/* ---- Site Text editor ---- */
+.site-text-group { margin-bottom: 1.6rem; }
+.site-text-group:last-child { margin-bottom: 0; }
+.site-text-group > h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.site-text-field { margin-bottom: 0.95rem; }
+.site-text-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-mute);
+  margin-bottom: 0.3rem;
+}
+.site-text-reset {
+  background: none;
+  border: none;
+  color: var(--royal, #00204a);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 6px;
+  opacity: 0.7;
+}
+.site-text-reset:hover { opacity: 1; background: rgba(0,32,74,0.06); }
+.site-text-field input[type="text"],
+.site-text-field textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  background: #fff;
+  resize: vertical;
+}
+.site-text-field input[type="text"]:focus,
+.site-text-field textarea:focus {
+  outline: none;
+  border-color: var(--royal, #00204a);
+  box-shadow: 0 0 0 3px rgba(0,32,74,0.12);
+}
+.site-text-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(0,0,0,0.07);
+}

@@ -171,5 +171,31 @@
     },
   };
 
+  // ---- EDITABLE SITE CONTENT ----
+  // Swap in admin-edited text for any element tagged with data-content-key.
+  // Falls back to the page's hardcoded text whenever a key has no saved value,
+  // so nothing ever breaks and customizing is fully optional.
+  async function applySiteContent() {
+    const nodes = document.querySelectorAll('[data-content-key]');
+    if (!nodes.length) return; // zero-cost on pages with no editable text
+    try {
+      const { data, error } = await client.from('site_content').select('key,value');
+      if (error || !data) return;
+      const map = {};
+      data.forEach(r => { map[r.key] = r.value; });
+      nodes.forEach(el => {
+        const v = map[el.getAttribute('data-content-key')];
+        if (typeof v === 'string' && v.trim() !== '') el.textContent = v;
+      });
+    } catch (_) {}
+  }
+  sla.applyContent = applySiteContent;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applySiteContent);
+  } else {
+    applySiteContent();
+  }
+
   window.sla = sla;
 })();

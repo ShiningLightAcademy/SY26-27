@@ -46,6 +46,9 @@
 
   document.getElementById('signout-btn').addEventListener('click', () => window.sla.signOut());
 
+  const _stSaveBtn = document.getElementById('site-text-save');
+  if (_stSaveBtn) _stSaveBtn.addEventListener('click', saveSiteText);
+
   // ----- NAVIGATION -----
   const navLinks = document.querySelectorAll('.admin-nav-link');
   const views = document.querySelectorAll('.admin-view');
@@ -85,6 +88,7 @@
     if (name === 'teachers')      return loadTeachers();
     if (name === 'gallery')       return loadGallery();
     if (name === 'home-shuffle')  return loadHomeShuffle();
+    if (name === 'site-text')     return loadSiteText();
   }
 
   // ============================================================
@@ -296,6 +300,162 @@
           <div class="meta">${escapeHtml(prettyPage(p.page))}</div>
         </div>`).join('');
     });
+  }
+
+  // ============================================================
+  // SITE TEXT (editable page content)
+  // ============================================================
+  // Each entry's `def` MUST equal the element's original on-page text exactly,
+  // so "equals default" can revert cleanly. `key` matches data-content-key.
+  const CONTENT_FIELDS = [
+    { group: 'Homepage', fields: [
+      { key: 'home.hero_season',       label: 'Hero — season tag', type: 'input',    def: 'School Year 2026–2027 · Carnival' },
+      { key: 'home.hero_tagline',      label: 'Hero — tagline',    type: 'input',    def: '"We make your child\'s world better."' },
+      { key: 'home.deped_label',       label: 'DepEd permits — label', type: 'input', def: 'DepEd Recognitions and Permits' },
+      { key: 'home.award1_title',      label: 'Award 1 — title',       type: 'input',    def: 'Best Performing Private School' },
+      { key: 'home.award1_desc',       label: 'Award 1 — description',  type: 'textarea', def: 'Top elementary & secondary school, Schools Division of Cagayan' },
+      { key: 'home.award2_title',      label: 'Award 2 — title',       type: 'input',    def: 'World-Class Scholars' },
+      { key: 'home.award2_desc',       label: 'Award 2 — description',  type: 'textarea', def: 'Medalists at international Science & Math Olympiads' },
+      { key: 'home.award3_title',      label: 'Award 3 — title',       type: 'input',    def: 'Champion Campus Journalists' },
+      { key: 'home.award3_desc',       label: 'Award 3 — description',  type: 'textarea', def: 'Awarded at the Asiarope International Journalism Olympiad, Malaysia' },
+      { key: 'home.award4_title',      label: 'Award 4 — title',       type: 'input',    def: 'Region 2 STARS Awardee' },
+      { key: 'home.award4_desc',       label: 'Award 4 — description',  type: 'textarea', def: "Among the region's best-performing private schools" },
+      { key: 'home.award5_title',      label: 'Award 5 — title',       type: 'input',    def: 'Fifteen Years of Excellence' },
+      { key: 'home.award5_desc',       label: 'Award 5 — description',  type: 'textarea', def: 'A government-recognized school, Nursery to Senior High' },
+      { key: 'home.foundation_eyebrow',label: 'Foundation — eyebrow',  type: 'input',    def: 'Our Foundation' },
+      { key: 'home.vision_text',       label: 'Vision statement',      type: 'textarea', def: 'A leading school wherein learners are developed to fear God, and excel in academics and character, who will become future leaders in following Biblical principles that will uplift the falling world.' },
+      { key: 'home.mission_text',      label: 'Mission statement',     type: 'textarea', def: 'The heart of education is the education of the heart. SLA will train and mold children to love and honor God and country and become socially responsible through high quality education.' },
+      { key: 'home.community_eyebrow', label: 'Community — eyebrow',    type: 'input',    def: 'Moments at SLA' },
+      { key: 'home.modalities_eyebrow',label: 'Modalities — eyebrow',   type: 'input',    def: 'Learning Modalities' },
+      { key: 'home.numbers_eyebrow',   label: 'By the Numbers — eyebrow', type: 'input',  def: 'By the Numbers' },
+    ]},
+    { group: 'Teachers page', fields: [
+      { key: 'teachers.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Faculty & Staff' },
+      { key: 'teachers.title',    label: 'Title',    type: 'input',    def: 'The Movers & Shakers.' },
+      { key: 'teachers.subtitle', label: 'Description', type: 'textarea', def: "Know your teachers here. Get to see their faces. All contact details are listed — please message during school days and hours only, and respect each teacher's privacy. For in-person classes, you may ask for help personally." },
+    ]},
+    { group: 'Schedule page', fields: [
+      { key: 'schedule.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Class Schedules' },
+      { key: 'schedule.title',    label: 'Title',    type: 'input',    def: 'Find your schedule.' },
+      { key: 'schedule.subtitle', label: 'Description', type: 'textarea', def: 'This is only for virtual class. Physical class schedules will be given during orientation. Click your grade level to be redirected to your schedule — make sure to download it. The links for all classes are present there.' },
+    ]},
+    { group: 'Classrooms page', fields: [
+      { key: 'classrooms.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Google Classrooms' },
+      { key: 'classrooms.title',    label: 'Title',    type: 'input',    def: 'Join your classroom.' },
+      { key: 'classrooms.subtitle', label: 'Description', type: 'textarea', def: "Find your grade level, click the link, and you're in. Each classroom contains your weekly tasks, materials, and announcements." },
+    ]},
+    { group: 'Portfolio page', fields: [
+      { key: 'portfolio.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Portfolio Color Codes' },
+      { key: 'portfolio.title',    label: 'Title',    type: 'input',    def: 'Subject color codes.' },
+      { key: 'portfolio.subtitle', label: 'Description', type: 'textarea', def: 'Find your grade level below. Tap to see all subjects with their assigned color codes. Use these to organize your folders, notebooks, and submissions consistently across all subjects.' },
+    ]},
+    { group: 'Gallery page', fields: [
+      { key: 'gallery.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Gallery' },
+      { key: 'gallery.title',    label: 'Title',    type: 'input',    def: 'Moments at SLA' },
+      { key: 'gallery.subtitle', label: 'Description', type: 'textarea', def: 'A look at the events, milestones, and ordinary days that make our community.' },
+    ]},
+    { group: 'Contact page', fields: [
+      { key: 'contact.eyebrow',      label: 'Eyebrow',  type: 'input',    def: 'Contact' },
+      { key: 'contact.title',        label: 'Title',    type: 'input',    def: 'Send us a word.' },
+      { key: 'contact.subtitle',     label: 'Description', type: 'textarea', def: 'Questions about enrollment, partnerships, or anything else — reach out through the form or any of the channels listed here.' },
+      { key: 'contact.form_heading', label: 'Form heading', type: 'input', def: 'Drop us a message.' },
+      { key: 'contact.form_note',    label: 'Form note',    type: 'textarea', def: "Your message goes straight to the SLA admin's inbox on this site. They'll email you back at the address you provide." },
+    ]},
+  ];
+
+  let _siteTextSaved = {};
+
+  async function loadSiteText() {
+    const wrap = document.getElementById('site-text-groups');
+    if (!wrap) return;
+    const status = document.getElementById('site-text-status');
+    if (status) status.textContent = '';
+
+    let saved = {};
+    try {
+      const { data, error } = await window.sla.db.from('site_content').select('key,value');
+      if (error) throw error;
+      (data || []).forEach(r => { saved[r.key] = r.value; });
+    } catch (e) {
+      console.error('[site-text load]', e);
+      wrap.innerHTML = '<div class="admin-empty">Could not load saved text. The site_content table may not exist yet — run the SQL, then refresh.</div>';
+      return;
+    }
+    _siteTextSaved = saved;
+
+    wrap.innerHTML = CONTENT_FIELDS.map(g => `
+      <div class="site-text-group">
+        <h3>${escapeHtml(g.group)}</h3>
+        ${g.fields.map(f => `
+          <div class="site-text-field">
+            <div class="site-text-label">
+              <span>${escapeHtml(f.label)}</span>
+              <button type="button" class="site-text-reset" data-key="${f.key}">Reset</button>
+            </div>
+            ${f.type === 'textarea'
+              ? `<textarea data-key="${f.key}" rows="3"></textarea>`
+              : `<input type="text" data-key="${f.key}" />`}
+          </div>`).join('')}
+      </div>`).join('');
+
+    // Fill values via DOM property (no escaping headaches)
+    CONTENT_FIELDS.forEach(g => g.fields.forEach(f => {
+      const el = wrap.querySelector(`[data-key="${f.key}"]`);
+      if (!el) return;
+      const sv = saved[f.key];
+      el.value = (typeof sv === 'string' && sv.trim() !== '') ? sv : f.def;
+    }));
+
+    wrap.querySelectorAll('.site-text-reset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        let field = null;
+        CONTENT_FIELDS.forEach(g => g.fields.forEach(f => { if (f.key === key) field = f; }));
+        const el = wrap.querySelector(`[data-key="${key}"]`);
+        if (el && field) el.value = field.def;
+      });
+    });
+  }
+
+  async function saveSiteText() {
+    const wrap = document.getElementById('site-text-groups');
+    const status = document.getElementById('site-text-status');
+    if (!wrap) return;
+    if (status) status.textContent = 'Saving…';
+
+    const now = new Date().toISOString();
+    const toUpsert = [], toDelete = [];
+    CONTENT_FIELDS.forEach(g => g.fields.forEach(f => {
+      const el = wrap.querySelector(`[data-key="${f.key}"]`);
+      if (!el) return;
+      const cur = el.value;
+      const sv = _siteTextSaved[f.key];
+      if (cur.trim() === f.def.trim()) {
+        if (sv !== undefined) toDelete.push(f.key);   // back to default → remove override
+      } else if (cur !== sv) {
+        toUpsert.push({ key: f.key, value: cur, updated_at: now, updated_by: profile.id });
+      }
+    }));
+
+    if (!toUpsert.length && !toDelete.length) {
+      if (status) status.textContent = 'No changes to save.';
+      return;
+    }
+    try {
+      if (toUpsert.length) {
+        const { error } = await window.sla.db.from('site_content').upsert(toUpsert, { onConflict: 'key' });
+        if (error) throw error;
+      }
+      if (toDelete.length) {
+        const { error } = await window.sla.db.from('site_content').delete().in('key', toDelete);
+        if (error) throw error;
+      }
+      if (status) status.textContent = `✓ Saved (${toUpsert.length} updated${toDelete.length ? ', ' + toDelete.length + ' reset' : ''}).`;
+      await loadSiteText();
+    } catch (e) {
+      console.error('[site-text save]', e);
+      if (status) status.textContent = 'Could not save: ' + (e.message || e);
+    }
   }
 
   // ============================================================

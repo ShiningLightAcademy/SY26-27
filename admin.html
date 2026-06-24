@@ -74,6 +74,9 @@
     <a href="#home-shuffle" class="admin-nav-link" data-view="home-shuffle">
         <span class="icon">🎴</span> <span>Home Shuffle</span>
       </a>
+      <a href="#site-text" class="admin-nav-link" data-view="site-text">
+        <span class="icon">✏️</span> <span>Site Text</span>
+      </a>
       </nav>
 
     <div class="admin-foot">
@@ -314,6 +317,22 @@
         <p class="admin-card-sub">Drag to reorder. Click any image to edit its caption.</p>
         <div id="shuffle-grid" class="shuffle-admin-grid">
           <div class="admin-empty">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-view" data-view="site-text">
+      <header class="admin-view-head">
+        <h1>Site Text</h1>
+        <p>Edit the words on the public website — page titles, descriptions, and section text. Leave a field as-is to keep it. Use “Reset” on a field to restore its original wording.</p>
+      </header>
+      <div class="admin-card">
+        <div id="site-text-groups">
+          <div class="admin-empty">Loading…</div>
+        </div>
+        <div class="site-text-actions">
+          <button id="site-text-save" class="btn-primary" type="button">Save all changes</button>
+          <span id="site-text-status" class="admin-feedback"></span>
         </div>
       </div>
     </section>
