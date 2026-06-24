@@ -4,7 +4,7 @@
    and gold. Mobile-first. Built to feel made, not generated.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 /* ============================================================
    TOKENS
@@ -1370,6 +1370,14 @@ body.nav-open { overflow: hidden; }
   font-size: clamp(2.1rem, 7vw, 3.4rem);
   color: var(--royal);
   margin: 0.4rem 0 0.75rem;
+}
+/* Modern, contemporary title treatment — gallery page only */
+.page-hero-title.gallery-title {
+  font-family: 'Space Grotesk', var(--font-text);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  font-size: clamp(2.3rem, 7.5vw, 3.8rem);
+  line-height: 1.02;
 }
 
 /* ============================================================

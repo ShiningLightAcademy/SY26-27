@@ -1000,6 +1000,21 @@
   font-size: 0.78rem;
   color: var(--text-mute);
 }
+.gset-drag {
+  cursor: grab;
+  color: var(--text-mute);
+  font-size: 1.05rem;
+  line-height: 1;
+  letter-spacing: -2px;
+  user-select: none;
+  flex: none;
+  padding: 0.2rem 0.15rem;
+}
+.gset-drag:active { cursor: grabbing; }
+.gset-titlewrap { flex: 1 1 auto; min-width: 0; }
+.gset-card { transition: box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease; }
+.gset-card.dragging { opacity: 0.5; box-shadow: 0 12px 30px rgba(0,0,0,0.16); }
+.gset-card.drop-target { border-color: #00204a; box-shadow: 0 0 0 2px rgba(0,32,74,0.25); }
 .gset-actions { display: flex; gap: 0.4rem; }
 .gset-actions button {
   padding: 0.45rem 0.85rem;

@@ -823,9 +823,10 @@
     (photos || []).forEach(p => { photoCount[p.set_id] = (photoCount[p.set_id] || 0) + 1; });
 
     list.innerHTML = sets.map(s => `
-      <div class="gset-card ${s.is_visible ? '' : 'gset-hidden'}" data-id="${s.id}">
+      <div class="gset-card ${s.is_visible ? '' : 'gset-hidden'}" data-id="${s.id}" draggable="true">
         <div class="gset-head">
-          <div>
+          <div class="gset-drag" title="Drag to reorder">⋮⋮</div>
+          <div class="gset-titlewrap">
             <strong>${escapeHtml(s.title)}</strong>
             <div class="meta">${escapeHtml(s.meta || '')}${s.event_date ? ' · ' + new Date(s.event_date).toLocaleDateString() : ''} · ${photoCount[s.id] || 0} photos${s.is_visible ? '' : ' · Hidden'}</div>
           </div>
@@ -848,6 +849,67 @@
     list.querySelectorAll('.gset-del').forEach(btn => {
       btn.addEventListener('click', () => deleteGallerySet(btn.dataset.id));
     });
+
+    wireGallerySetDragDrop(list);
+  }
+
+  // ---- DRAG TO REORDER GALLERY SETS ----
+  function wireGallerySetDragDrop(list) {
+    let dragged = null;
+    list.querySelectorAll('.gset-card').forEach(card => {
+      card.addEventListener('dragstart', e => {
+        // Only start a set-drag from the card chrome — never from buttons,
+        // inputs, or the expanded photo panel (which has its own drag-reorder).
+        if (e.target.closest('button, input, textarea, .gset-photos')) {
+          e.preventDefault();
+          return;
+        }
+        dragged = card;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        list.querySelectorAll('.gset-card').forEach(c => c.classList.remove('drop-target'));
+        dragged = null;
+      });
+      card.addEventListener('dragover', e => {
+        if (!dragged) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (card !== dragged) card.classList.add('drop-target');
+      });
+      card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
+      card.addEventListener('drop', async e => {
+        e.preventDefault();
+        card.classList.remove('drop-target');
+        if (!dragged || dragged === card) return;
+        const rect = card.getBoundingClientRect();
+        const dropAfter = (e.clientY - rect.top) > (rect.height / 2);
+        if (dropAfter) card.parentNode.insertBefore(dragged, card.nextSibling);
+        else card.parentNode.insertBefore(dragged, card);
+        await persistGallerySetOrder(list);
+      });
+    });
+  }
+
+  async function persistGallerySetOrder(list) {
+    const cards = [...list.querySelectorAll('.gset-card')];
+    try {
+      await Promise.all(cards.map((card, idx) =>
+        window.sla.db.from('gallery_sets').update({ sort_order: idx }).eq('id', card.dataset.id)
+      ));
+      const toast = document.createElement('div');
+      toast.textContent = '✓ Order saved';
+      toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;background:#1E8E3E;color:white;padding:.65rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:500;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);animation:fadeInOut 2.5s ease forwards;';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    } catch (e) {
+      console.error('[gallery reorder]', e);
+      alert('Failed to save order: ' + e.message);
+      loadGallery();
+    }
   }
 
   async function toggleSetPhotos(setId, btn) {
