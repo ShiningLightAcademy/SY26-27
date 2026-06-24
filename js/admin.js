@@ -26,6 +26,13 @@
   document.getElementById('admin-loading').hidden = true;
   document.getElementById('admin-app').hidden = false;
 
+  // ----- PRESENCE -----
+  // admin.html doesn't load auth-guard.js, so update last-seen and join the
+  // live presence channel here — otherwise people on the admin site never
+  // show up as "online".
+  window.sla.touchPresence().catch(() => {});
+  window.sla.joinPresence().catch(() => {});
+
   // ----- POPULATE USER INFO -----
   const displayName = profile.full_name || profile.email.split('@')[0];
   document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
@@ -272,6 +279,11 @@
         listEl.innerHTML = '<div class="admin-empty">No one is online right now.</div>';
         return;
       }
+      const prettyPage = (p) => {
+        if (!p || p === 'index.html') return 'Home';
+        if (p === 'admin.html') return 'Admin panel';
+        return p.replace('.html', '').replace(/^./, c => c.toUpperCase());
+      };
       listEl.innerHTML = people.map(p => `
         <div class="admin-list-item" style="cursor:default;">
           <div style="display:flex;align-items:center;gap:0.65rem;">
@@ -281,7 +293,7 @@
               <div class="meta">${escapeHtml(p.email)}${p.role ? ' · ' + p.role : ''}${p.tabs > 1 ? ' · ' + p.tabs + ' tabs' : ''}</div>
             </div>
           </div>
-          <div class="meta">${escapeHtml(p.page)}</div>
+          <div class="meta">${escapeHtml(prettyPage(p.page))}</div>
         </div>`).join('');
     });
   }
