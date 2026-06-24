@@ -1304,10 +1304,11 @@ body.nav-open { overflow: hidden; }
 .gallery-section { display: flex; flex-direction: column; }
 .gallery-section-head { text-align: center; margin-bottom: 0.85rem; }
 .gallery-section-head h2 {
+  font-family: 'Space Grotesk', var(--font-text);
   font-size: clamp(1.2rem, 3.5vw, 1.7rem);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-weight: 600;
   color: var(--royal);
 }
 .gallery-section-meta { font-size: 0.82rem; color: var(--text-mute); margin-top: 0.15rem; }
@@ -1370,14 +1371,6 @@ body.nav-open { overflow: hidden; }
   font-size: clamp(2.1rem, 7vw, 3.4rem);
   color: var(--royal);
   margin: 0.4rem 0 0.75rem;
-}
-/* Modern, contemporary title treatment — gallery page only */
-.page-hero-title.gallery-title {
-  font-family: 'Space Grotesk', var(--font-text);
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  font-size: clamp(2.3rem, 7.5vw, 3.8rem);
-  line-height: 1.02;
 }
 
 /* ============================================================
