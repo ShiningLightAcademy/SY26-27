@@ -33,6 +33,9 @@
   // Touch presence async — don't block rendering
   window.sla.touchPresence().catch(() => {});
 
+  // Join live (websocket) presence so "who's online now" works in real time
+  window.sla.joinPresence().catch(() => {});
+
   // ----------------------------------------------------------------
   // Site visibility gate (maintenance mode)
   // When public_visible = false, only admins may view the site.

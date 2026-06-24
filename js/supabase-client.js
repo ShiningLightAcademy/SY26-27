@@ -118,6 +118,57 @@
         .update({ last_seen_at: new Date().toISOString() })
         .eq('id', user.id);
     },
+
+    // ---- LIVE PRESENCE (Realtime websocket) ----
+    _presenceChannel: null,
+    _presenceCallbacks: [],
+
+    // Join the shared "online-users" channel and broadcast that this user is here.
+    // Safe to call on every protected page; it only joins once per page load.
+    async joinPresence() {
+      if (this._presenceChannel) return this._presenceChannel;
+      const user = await this.getUser();
+      if (!user) return null;
+      let profile = null;
+      try { profile = await this.getProfile(); } catch (_) {}
+      const meta = {
+        user_id: user.id,
+        email: user.email,
+        full_name: (profile && profile.full_name) || user.email,
+        role: (profile && profile.role) || 'member',
+        is_main_admin: !!(profile && profile.is_main_admin),
+        page: (window.location.pathname.split('/').pop() || 'index.html'),
+        online_at: new Date().toISOString(),
+      };
+      const channel = client.channel('online-users', {
+        config: { presence: { key: user.id } },
+      });
+      channel.on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        this._presenceCallbacks.forEach(cb => { try { cb(state); } catch (_) {} });
+      });
+      channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          try { await channel.track(meta); } catch (_) {}
+        }
+      });
+      // Leave cleanly when the tab closes so others see us drop off quickly.
+      window.addEventListener('beforeunload', () => {
+        try { channel.untrack(); client.removeChannel(channel); } catch (_) {}
+      });
+      this._presenceChannel = channel;
+      return channel;
+    },
+
+    // Register a callback that fires whenever the online list changes.
+    // Fires immediately with the current state if already connected.
+    onPresenceSync(cb) {
+      if (typeof cb !== 'function') return;
+      this._presenceCallbacks.push(cb);
+      if (this._presenceChannel) {
+        try { cb(this._presenceChannel.presenceState()); } catch (_) {}
+      }
+    },
   };
 
   window.sla = sla;

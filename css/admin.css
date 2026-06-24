@@ -1223,3 +1223,37 @@
 }
 .switch input:checked + .switch-track .switch-thumb { transform: translateX(24px); }
 .switch input:focus-visible + .switch-track { outline: 2.5px solid var(--gold, #c89b3c); outline-offset: 3px; }
+
+/* ---- Online now (live presence) ---- */
+.online-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.45rem;
+  margin-left: 0.45rem;
+  border-radius: 999px;
+  background: #1E8E3E;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.online-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #1E8E3E;
+  flex: none;
+  box-shadow: 0 0 0 0 rgba(30, 142, 62, 0.5);
+  animation: onlinePulse 2s infinite;
+}
+@keyframes onlinePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(30, 142, 62, 0.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(30, 142, 62, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(30, 142, 62, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .online-dot { animation: none; }
+}

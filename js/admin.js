@@ -171,6 +171,9 @@
       // Site visibility switch (main admin only)
       wireVisibility(isMainAdmin);
 
+      // Live "who's online now" via Realtime presence (main admin only)
+      wireOnlineNow(isMainAdmin);
+
       const queries = [
         // Always fetch for all admins:
         window.sla.db.from('contact_messages').select('id', { count:'exact', head:true }).eq('is_read', false),
@@ -228,6 +231,59 @@
         </div>`;
       }).join('');
     } catch (e) { console.error('[dashboard]', e); }
+  }
+
+  // ============================================================
+  // ONLINE NOW (live Realtime presence)
+  // ============================================================
+  let _onlineWired = false;
+  function wireOnlineNow(isMainAdmin) {
+    const card = document.getElementById('online-now-card');
+    if (!card) return;
+    if (!isMainAdmin) { card.hidden = true; return; }
+    card.hidden = false;
+
+    const listEl = document.getElementById('online-now-list');
+    const countEl = document.getElementById('online-now-count');
+
+    // Make sure we've joined the presence channel (auth-guard usually has already).
+    window.sla.joinPresence().catch(() => {});
+
+    if (_onlineWired) return;   // only register the sync handler once
+    _onlineWired = true;
+
+    window.sla.onPresenceSync((state) => {
+      // state = { userId: [meta, meta, ...] } — one key per person, one entry per open tab.
+      const people = Object.keys(state).map(key => {
+        const metas = state[key] || [];
+        const m = metas[0] || {};
+        return {
+          name: m.full_name || (m.email ? m.email.split('@')[0] : 'Unknown'),
+          email: m.email || '',
+          role: m.is_main_admin ? 'Main Admin' : (m.role === 'admin' ? 'Admin' : 'Member'),
+          tabs: metas.length,
+          page: m.page || '',
+        };
+      }).sort((a, b) => a.name.localeCompare(b.name));
+
+      if (countEl) countEl.textContent = people.length;
+      if (!listEl) return;
+      if (!people.length) {
+        listEl.innerHTML = '<div class="admin-empty">No one is online right now.</div>';
+        return;
+      }
+      listEl.innerHTML = people.map(p => `
+        <div class="admin-list-item" style="cursor:default;">
+          <div style="display:flex;align-items:center;gap:0.65rem;">
+            <span class="online-dot" aria-hidden="true"></span>
+            <div>
+              <strong>${escapeHtml(p.name)}</strong>
+              <div class="meta">${escapeHtml(p.email)}${p.role ? ' · ' + p.role : ''}${p.tabs > 1 ? ' · ' + p.tabs + ' tabs' : ''}</div>
+            </div>
+          </div>
+          <div class="meta">${escapeHtml(p.page)}</div>
+        </div>`).join('');
+    });
   }
 
   // ============================================================
