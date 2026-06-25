@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Sign in — Shining Light Academy</title>
-<link rel="stylesheet" href="css/styles.css" />
-<link rel="icon" type="image/svg+xml" href="images/sla-logo.svg" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<link rel="icon" type="image/svg+xml" href="assets/images/sla-logo.svg" />
 <style>
   /* ============================================================
      LOGIN PAGE — full-bleed building background + glass card
@@ -18,7 +18,7 @@
     padding: 2rem 1rem;
     background:
       linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.75) 100%),
-      url('images/sla-building.jpg') center 35% / cover no-repeat fixed;
+      url('assets/images/sla-building.jpg') center 35% / cover no-repeat fixed;
     color: var(--white);
   }
 
@@ -173,7 +173,7 @@
 <body>
 
 <div class="login-card">
-  <img src="images/sla-logo.svg" alt="SLA Crest" class="login-logo" />
+  <img src="assets/images/sla-logo.svg" alt="SLA Crest" class="login-logo" />
   <h1 class="login-title">Welcome back, SLAion.</h1>
   <p class="login-sub">Sign in with your <strong>@slasm.net</strong> Google account to continue.</p>
 
@@ -195,7 +195,7 @@
 
 <!-- Supabase JS SDK from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
+<script src="src/core/supabase-client.js"></script>
 
 <script>
 (async () => {

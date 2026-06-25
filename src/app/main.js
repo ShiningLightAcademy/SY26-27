@@ -371,7 +371,7 @@ if (document.readyState === 'loading') {
     <div class="sla-intro-content">
       <div class="sla-intro-rays"></div>
       <div class="sla-intro-particles"></div>
-      <img src="images/sla-logo.svg" alt="" class="sla-intro-logo" />
+      <img src="assets/images/sla-logo.svg" alt="" class="sla-intro-logo" />
     </div>
   `;
   // Insert at top of body

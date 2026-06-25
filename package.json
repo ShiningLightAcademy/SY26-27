@@ -1,0 +1,23 @@
+{
+  "name": "sla-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shining Light Academy — login-gated, Supabase-backed school portal (vanilla HTML/CSS/JS, no build step).",
+  "homepage": "https://shininglightacademy.github.io/SY26-27/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShiningLightAcademy/SY26-27.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "npx --yes serve .",
+    "dev": "npx --yes serve .",
+    "format": "npx --yes prettier --write \"**/*.{html,css,js,json,md}\"",
+    "format:check": "npx --yes prettier --check \"**/*.{html,css,js,json,md}\"",
+    "check:assets": "node scripts/check-asset-refs.mjs",
+    "test": "node scripts/check-asset-refs.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

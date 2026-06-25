@@ -68,7 +68,7 @@
     o.className = 'sla-maintenance';
     o.innerHTML = `
       <div class="sla-maintenance-card">
-        <img src="${relUrl('images/sla-logo.svg')}" alt="" class="sla-maintenance-logo" />
+        <img src="${relUrl('assets/images/sla-logo.svg')}" alt="" class="sla-maintenance-logo" />
         <h1>We'll be right back</h1>
         <p>The Shining Light Academy site is briefly unavailable while we make some updates. Please check again soon.</p>
         <button class="sla-maintenance-signout" id="sla-maint-signout">Sign out</button>

@@ -5,20 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="Shining Light Academy of Cagayan Valley, Inc. — We make your child's world better." />
 <title>Shining Light Academy of Cagayan Valley, Inc.</title>
-<link rel="stylesheet" href="css/styles.css" />
-<link rel="icon" type="image/svg+xml" href="images/sla-logo.svg" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<link rel="icon" type="image/svg+xml" href="assets/images/sla-logo.svg" />
 <!-- Auth (must load before page content) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/auth-guard.js"></script>
-<script src="js/edit-mode.js"></script>
+<script src="src/core/supabase-client.js"></script>
+<script src="src/core/auth-guard.js"></script>
+<script src="src/features/edit-mode.js"></script>
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
-      <img src="images/sla-logo.svg" alt="" />
+      <img src="assets/images/sla-logo.svg" alt="" />
       <span>Shining Light Academy</span>
     </a>
     <ul class="nav-links">
@@ -39,11 +39,11 @@
 <!-- HERO: Building image + Liquid Glass title pane -->
 <header class="hero">
   <div class="hero-bg">
-    <img src="images/sla-building.jpg" alt="Shining Light Academy building" />
+    <img src="assets/images/sla-building.jpg" alt="Shining Light Academy building" />
   </div>
   <div class="hero-glass">
     <span class="hero-season" data-content-key="home.hero_season">School Year 2026–2027 · Carnival</span>
-    <img src="images/sla-logo.svg" alt="SLA Crest" class="hero-logo" />
+    <img src="assets/images/sla-logo.svg" alt="SLA Crest" class="hero-logo" />
     <h1 class="hero-title">Shining <span class="hero-glow">Light</span><br />Academy</h1>
     <p class="hero-sub" data-content-key="home.hero_sub">of Cagayan Valley, Inc.</p>
     <p class="hero-tagline" data-content-key="home.hero_tagline">"We make your child's world better."</p>
@@ -281,7 +281,7 @@
   </div>
 </footer>
 
-<script src="js/main.js"></script>
+<script src="src/app/main.js"></script>
 
 <script>
 // Fetch home-shuffle images from DB and replace the static placeholder cards

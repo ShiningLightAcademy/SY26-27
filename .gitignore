@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local environment / secrets (the public anon key lives in src/core, but never commit anything else)
+.env
+.env.*
+
+# Build output (none today — reserved if a bundler is added later)
+dist/

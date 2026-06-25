@@ -10,7 +10,7 @@ school portal** with a full admin dashboard. It is still built with **vanilla HT
 JavaScript** — no framework and no build step — but it now uses **Supabase** for authentication,
 data storage, and file uploads, and is hosted for free on **GitHub Pages**.
 
-- **Live site:** `https://rjmo-02.github.io/sla-26-27/`
+- **Live site:** `https://shininglightacademy.github.io/SY26-27/`
 - **Access:** restricted to `@slasm.net` Google accounts (school community only)
 
 ---
@@ -50,7 +50,7 @@ data storage, and file uploads, and is hosted for free on **GitHub Pages**.
 
 | Layer | What's used |
 |---|---|
-| Markup / styling | Hand-written HTML5 + a single `css/styles.css` design system |
+| Markup / styling | Hand-written HTML5 + an `assets/css/styles.css` design system |
 | Interactivity | Vanilla JavaScript (no framework, no bundler) |
 | Backend / data | [Supabase](https://supabase.com) — Postgres + Auth + Storage + Realtime |
 | Auth | Supabase Auth → Google OAuth (PKCE flow), locked to `@slasm.net` |
@@ -76,22 +76,36 @@ SY26-27/
 ├── contact.html        ← Contact info + message form (saves to DB)
 ├── login.html          ← Google sign-in page
 ├── admin.html          ← Admin dashboard (admins only)
-├── css/
-│   ├── styles.css      ← Whole-site design system + components + animations
-│   └── admin.css       ← Admin dashboard styling
-├── js/
-│   ├── supabase-client.js  ← Initializes Supabase, exposes the `window.sla` helper API
-│   ├── auth-guard.js       ← Per-page sign-in check + the nav user menu
-│   ├── main.js             ← Public-site interactions & animations
-│   ├── admin.js            ← The entire admin dashboard logic
-│   └── edit-mode.js        ← Inline on-page text editing for admins
-└── images/             ← Logo (sla-logo.svg / .png), building photo, etc.
+│
+├── assets/
+│   ├── css/
+│   │   ├── styles.css  ← Whole-site design system + components + animations
+│   │   └── admin.css   ← Admin dashboard styling
+│   └── images/         ← Logo (sla-logo.svg / .png), building photo, etc.
+├── src/
+│   ├── core/           ← Infrastructure everything depends on
+│   │   ├── supabase-client.js  ← Initializes Supabase, exposes the `window.sla` helper API
+│   │   └── auth-guard.js       ← Per-page sign-in check + nav user menu + maintenance screen
+│   ├── app/
+│   │   └── main.js             ← Public-site interactions & animations
+│   ├── features/
+│   │   └── edit-mode.js        ← Inline on-page text editing for admins
+│   └── pages/
+│       └── admin.js            ← The entire admin dashboard logic
+├── docs/               ← Architecture, database, and deployment guides
+├── scripts/            ← Repo tooling (asset-reference checker)
+└── .github/            ← CI workflow, issue/PR templates, CODEOWNERS
 ```
+
+> The HTML pages stay at the repo root on purpose — their URLs are pinned in Supabase Auth and
+> Google OAuth, so moving them breaks sign-in. Assets and source under `assets/` and `src/` can be
+> reorganized freely. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
+> [`docs/DATABASE.md`](docs/DATABASE.md), and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 The database schema and seed scripts live in Supabase (run once in the SQL Editor) and are kept
 outside this repo for reference.
 
-### The `window.sla` helper (`js/supabase-client.js`)
+### The `window.sla` helper (`src/core/supabase-client.js`)
 
 Every page loads `supabase-client.js` first. It creates one Supabase client and exposes a small
 namespace, `window.sla`, that the rest of the site calls into:
@@ -157,7 +171,7 @@ collapses to a dismissible top banner).
 
 ## The admin dashboard
 
-`admin.html` + `js/admin.js` give admins a full content-management UI with these views:
+`admin.html` + `src/pages/admin.js` give admins a full content-management UI with these views:
 
 - **Dashboard** — at-a-glance stats (unread messages, teacher count, active announcements). Main
   admins also see active-user counts, recent activity, a live **"Online now"** list (via Supabase
@@ -180,7 +194,7 @@ collapses to a dismissible top banner).
 
 ## Inline "Edit text" mode
 
-`js/edit-mode.js` adds an even quicker way to edit copy. Any on-page element tagged with
+`src/features/edit-mode.js` adds an even quicker way to edit copy. Any on-page element tagged with
 `data-content-key="..."` is editable **in place**. When an admin is signed in, an **"Edit text"**
 pill appears; clicking it makes those elements `contenteditable`, and "Save changes" upserts the
 edits into the `site_content` table. Members and visitors never see any of this. (The same keys are
@@ -218,7 +232,7 @@ This is a static site, so deployment is just hosting the files — but the backe
    `@slasm.net`.
 2. **Create the database tables** by running the schema/seed scripts in the Supabase SQL Editor.
 3. **Add your keys** — put your Supabase **Project URL** and **anon public** key into
-   `js/supabase-client.js`. (Never put the `service_role` key in browser code.)
+   `src/core/supabase-client.js`. (Never put the `service_role` key in browser code.)
 4. **Deploy to GitHub Pages:** keep the files in this repo, then
    **Settings → Pages → Deploy from branch → `main` / root**. Changes go live ~1 minute after upload.
 5. **Configure redirect URLs** in Supabase (Auth → URL Configuration) to match the Pages URL.
