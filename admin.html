@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Admin — Shining Light Academy</title>
-<link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="stylesheet" href="assets/css/admin.css" />
-<link rel="icon" type="image/svg+xml" href="assets/images/sla-logo.svg" />
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="icon" type="image/svg+xml" href="images/sla-logo.svg" />
 
 <!-- Auth (must load before page content) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="src/core/supabase-client.js"></script>
+<script src="js/supabase-client.js"></script>
 </head>
 <body class="admin-body">
 
@@ -33,7 +33,7 @@
 <div id="admin-app" class="admin-app" hidden>
   <aside class="admin-sidebar">
     <div class="admin-brand">
-      <img src="assets/images/sla-logo.svg" alt="" />
+      <img src="images/sla-logo.svg" alt="" />
       <div>
         <strong>Admin</strong>
         <span>Shining Light Academy</span>
@@ -423,10 +423,10 @@
           </label>
         </div>
         <div class="form-row">
-          <label>TM/Smart
+          <label>TNT/SMART
             <input type="text" id="teacher-tm" />
           </label>
-          <label>Globe
+          <label>TM/GLOBE
             <input type="text" id="teacher-globe" />
           </label>
         </div>
@@ -463,6 +463,6 @@
   </div>
 </div>
 
-<script src="src/pages/admin.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>
