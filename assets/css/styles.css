@@ -1345,20 +1345,47 @@ body.nav-open { overflow: hidden; }
 .gallery-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem 1.5rem;
-  margin-bottom: 4rem;
+  gap: clamp(1.75rem, 4vw, 3rem);
+  margin: clamp(2.5rem, 6vw, 4rem) 0 clamp(4rem, 9vw, 6rem);
 }
-.gallery-section { display: flex; flex-direction: column; }
-.gallery-section-head { text-align: center; margin-bottom: 0.85rem; }
+/* Each set is a padded panel — room to breathe */
+.gallery-section {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.4rem, 3vw, 2.25rem);
+  border-radius: var(--radius-xl);
+  background: var(--white);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.4s var(--ease-emphasis), box-shadow 0.4s var(--ease-emphasis);
+}
+.gallery-section:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+/* Alternate panels: deep royal blue, like the home-page card shuffle */
+.gallery-section:nth-child(even) {
+  background: linear-gradient(160deg, var(--royal-2), var(--royal) 72%);
+  border-color: transparent;
+  color: var(--paper);
+  box-shadow: var(--shadow-md);
+}
+.gallery-section-head {
+  text-align: center;
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
 .gallery-section-head h2 {
-  font-family: 'Space Grotesk', var(--font-text);
-  font-size: clamp(1.2rem, 3.5vw, 1.7rem);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.12;
   font-weight: 600;
   color: var(--royal);
 }
-.gallery-section-meta { font-size: 0.82rem; color: var(--text-mute); margin-top: 0.15rem; }
+.gallery-section:nth-child(even) .gallery-section-head h2 { color: var(--paper); }
+.gallery-section-meta { font-size: 0.88rem; color: var(--text-mute); margin-top: 0.4rem; }
+.gallery-section:nth-child(even) .gallery-section-meta { color: var(--gold-lt); }
 .gallery-carousel {
   position: relative;
   border-radius: var(--radius-lg);
@@ -1423,6 +1450,15 @@ body.nav-open { overflow: hidden; }
   color: var(--royal);
   margin: 0.4rem 0 0.75rem;
 }
+/* Gallery hero — larger, more expressive title (scoped to gallery only) */
+.gallery-hero { padding-block: clamp(3.5rem, 9vw, 6rem); }
+.gallery-hero .page-hero-title {
+  font-size: clamp(2.8rem, 9vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  margin: 0.5rem 0 1rem;
+}
+.gallery-hero .page-hero-sub { font-size: clamp(1.02rem, 2.4vw, 1.18rem); max-width: 60ch; }
 
 /* ============================================================
    LOGIN
