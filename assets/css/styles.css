@@ -1410,6 +1410,10 @@ body.nav-open { overflow: hidden; }
 @media (min-width: 1024px) {
   .gallery-section[data-size="small"] { grid-column: span 1; }
 }
+/* Portrait carousel layout — tall photos (e.g. phone shots). Placed after the
+   size rules above so it overrides their aspect-ratio at equal specificity. */
+.gallery-section[data-layout="portrait"] .gallery-carousel-track { aspect-ratio: 4 / 5; }
+.gallery-section[data-layout="portrait"] .gallery-slide img { object-fit: cover; }
 
 /* Shared page hero title helpers used by gallery.html */
 .page-hero-title {

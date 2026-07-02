@@ -139,6 +139,7 @@
       const setPhotos = photosBySet[set.id] || [];
       if (setPhotos.length === 0) return ''; // skip empty sets
       const size = set.size_class || 'medium';
+      const layout = set.layout === 'portrait' ? 'portrait' : 'landscape';
 
       const slides = setPhotos.map((p, i) => `
         <div class="gallery-slide${i === 0 ? ' active' : ''}" data-index="${i}">
@@ -154,7 +155,7 @@
       const meta = [set.meta, fmtDate(set.event_date)].filter(Boolean).join(' · ');
 
       return `
-        <article class="gallery-section" data-set-id="${set.id}" data-size="${esc(size)}">
+        <article class="gallery-section" data-set-id="${set.id}" data-size="${esc(size)}" data-layout="${esc(layout)}">
           <header class="gallery-section-head">
             <h2>${esc(set.title)}</h2>
             ${meta ? `<p class="gallery-section-meta">${esc(meta)}</p>` : ''}

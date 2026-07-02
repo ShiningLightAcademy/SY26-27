@@ -1309,6 +1309,7 @@
     document.getElementById('gset-date').value = '';
     document.getElementById('gset-visible').checked = true;
     document.querySelectorAll('input[name="gset-size"]').forEach(r => { r.checked = (r.value === 'medium'); });
+    document.querySelectorAll('input[name="gset-layout"]').forEach(r => { r.checked = (r.value === 'landscape'); });
     document.getElementById('gset-form-feedback').textContent = '';
     document.getElementById('gset-form-feedback').className = 'admin-feedback';
     document.getElementById('gset-modal-title').textContent = id ? 'Edit gallery set' : 'New gallery set';
@@ -1323,6 +1324,8 @@
         document.getElementById('gset-visible').checked = !!data.is_visible;
         const size = data.size_class || 'medium';
         document.querySelectorAll('input[name="gset-size"]').forEach(r => { r.checked = (r.value === size); });
+        const layout = data.layout || 'landscape';
+        document.querySelectorAll('input[name="gset-layout"]').forEach(r => { r.checked = (r.value === layout); });
       });
     }
     gsetModal.hidden = false;
@@ -1343,17 +1346,26 @@
     const title = document.getElementById('gset-title').value.trim();
     if (!title) { fb.classList.add('error'); fb.textContent = 'Title is required.'; return; }
     const sizeRadio = document.querySelector('input[name="gset-size"]:checked');
+    const layoutRadio = document.querySelector('input[name="gset-layout"]:checked');
     const payload = {
       title,
       meta: document.getElementById('gset-meta').value.trim() || null,
       event_date: document.getElementById('gset-date').value || null,
       is_visible: document.getElementById('gset-visible').checked,
       size_class: sizeRadio ? sizeRadio.value : 'medium',
+      layout: layoutRadio ? layoutRadio.value : 'landscape',
     };
     const id = document.getElementById('gset-id').value;
-    const result = id
-      ? await window.sla.db.from('gallery_sets').update(payload).eq('id', id)
-      : await window.sla.db.from('gallery_sets').insert(payload);
+    const save = (p) => id
+      ? window.sla.db.from('gallery_sets').update(p).eq('id', id)
+      : window.sla.db.from('gallery_sets').insert(p);
+    let result = await save(payload);
+    // Backward-compat: if the `layout` column hasn't been added to the DB yet
+    // (see docs/migrations), drop it and retry so saving never breaks.
+    if (result.error && /layout/.test(result.error.message)) {
+      const { layout, ...rest } = payload;
+      result = await save(rest);
+    }
     if (result.error) { fb.classList.add('error'); fb.textContent = 'Save failed: ' + result.error.message; return; }
     closeGsetModal();
     loadGallery();

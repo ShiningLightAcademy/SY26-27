@@ -18,6 +18,8 @@ read or write. Uploaded images go to a Supabase **Storage** bucket named `sla-me
 | `home_shuffle_images` | Homepage rotating cards: `image_url`, `caption`, `alt_text`, `is_visible`, `sort_order`. |
 | `site_content` | Key/value overrides for editable site text (`key`, `value`, `updated_by`). |
 | `site_settings` | Global flags such as `public_visible` (maintenance mode). |
+| `gallery_sets` | A gallery section: `title`, `meta`, `event_date`, `size_class` (`small`/`medium`/`large`/`full`), `layout` (`landscape`/`portrait`), `is_visible`, `sort_order`. |
+| `gallery_photos` | Photos in a set: `set_id`, `photo_url`, `alt_text`, `caption`, `sort_order`. |
 
 ## Access model (enforced by RLS)
 
@@ -30,5 +32,8 @@ read or write. Uploaded images go to a Supabase **Storage** bucket named `sla-me
 
 - Schema and seed scripts are run once in the Supabase **SQL Editor**; they are not part
   of the deployed site.
+- Incremental schema changes live in [`docs/migrations/`](migrations/). Run each `.sql`
+  file once in the SQL Editor. Newest: `2026-07-02_gallery_layout.sql` (adds the
+  `gallery_sets.layout` portrait/landscape option).
 - The editable-text keys (`site_content.key`) correspond to `data-content-key` attributes
   in the HTML and to the field list in `src/pages/admin.js` (Site text view).
