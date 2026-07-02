@@ -1340,54 +1340,54 @@ body.nav-open { overflow: hidden; }
 }
 
 /* ============================================================
-   GALLERY — full-width stacked rows, alternating royal bands
+   GALLERY — rows of size-variant sets, alternating royal bands
    ============================================================ */
 .gallery-grid {
   display: flex;
   flex-direction: column;
   margin-bottom: clamp(3.5rem, 8vw, 6rem);
 }
-/* Each set is a full-width row with generous vertical breathing room */
-.gallery-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-block: clamp(3rem, 7vw, 5rem);
+/* A row holds one or more sets side by side (packed to 4 columns).
+   Generous vertical padding keeps things from feeling cramped. */
+.gallery-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  padding-block: clamp(2.75rem, 6vw, 4.25rem);
 }
 /* Alternate rows: a solid dark royal-blue band, edge to edge like the
    home-page card shuffle. box-shadow paints the colour; clip-path keeps it
    to a horizontal band (no vertical bleed) and adds no scrollbar. */
-.gallery-section:nth-child(even) {
+.gallery-row:nth-child(even) {
   background: var(--royal);
   color: var(--paper);
   box-shadow: 0 0 0 100vmax var(--royal);
   clip-path: inset(0 -100vmax);
 }
+.gallery-section { display: flex; flex-direction: column; }
 .gallery-section-head {
   text-align: center;
-  margin-bottom: clamp(1.1rem, 2.5vw, 1.75rem);
+  margin-bottom: clamp(0.9rem, 2vw, 1.35rem);
 }
 .gallery-section-head h2 {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
   text-transform: none;
   letter-spacing: 0;
   line-height: 1.12;
   font-weight: 600;
   color: var(--royal);
 }
-.gallery-section:nth-child(even) .gallery-section-head h2 { color: var(--paper); }
-.gallery-section-meta { font-size: 0.9rem; color: var(--text-mute); margin-top: 0.4rem; }
-.gallery-section:nth-child(even) .gallery-section-meta { color: var(--gold-lt); }
-/* Carousel is centred and width-limited within the row (varies by size class) */
+.gallery-row:nth-child(even) .gallery-section-head h2 { color: var(--paper); }
+.gallery-section-meta { font-size: 0.88rem; color: var(--text-mute); margin-top: 0.35rem; }
+.gallery-row:nth-child(even) .gallery-section-meta { color: var(--gold-lt); }
 .gallery-carousel {
   position: relative;
-  width: 100%;
-  max-width: 780px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: rgba(0, 16, 38, 0.25);
   box-shadow: var(--shadow-md);
+  flex: 1;
 }
 .gallery-carousel-track { position: relative; width: 100%; aspect-ratio: 4 / 3; }
 .gallery-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s var(--ease-emphasis); }
@@ -1419,12 +1419,14 @@ body.nav-open { overflow: hidden; }
 .gallery-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 0.3rem; z-index: 4; }
 .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(251,248,241,0.55); border: none; transition: all 0.3s var(--ease); }
 .gallery-dot.active { background: var(--gold-lt); width: 22px; border-radius: 999px; }
-/* Size classes now set the image width within the row, not grid spans */
+/* Within a row, size classes set how many of the 4 columns a set spans,
+   so sets sit beside each other. */
 @media (min-width: 680px) {
-  .gallery-section[data-size="small"]  .gallery-carousel { max-width: 560px; }
-  .gallery-section[data-size="medium"] .gallery-carousel { max-width: 780px; }
-  .gallery-section[data-size="large"]  .gallery-carousel { max-width: 960px; }
-  .gallery-section[data-size="full"]   .gallery-carousel { max-width: 1120px; }
+  .gallery-row { grid-template-columns: repeat(4, 1fr); align-items: start; }
+  .gallery-section[data-size="small"]  { grid-column: span 1; }
+  .gallery-section[data-size="medium"] { grid-column: span 2; }
+  .gallery-section[data-size="large"]  { grid-column: span 3; }
+  .gallery-section[data-size="full"]   { grid-column: span 4; }
   .gallery-section[data-size="small"] .gallery-carousel-track { aspect-ratio: 1/1; }
   .gallery-section[data-size="large"] .gallery-carousel-track,
   .gallery-section[data-size="full"]  .gallery-carousel-track { aspect-ratio: 16/9; }

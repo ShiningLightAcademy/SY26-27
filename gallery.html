@@ -134,10 +134,9 @@
       photosBySet[p.set_id].push(p);
     });
 
-    // Render sections in a 4-column grid; each section takes 1/2/3/4 cols
-    const sectionsHtml = sets.map(set => {
+    // Build the HTML for a single set (a size-variant carousel)
+    function buildSection(set) {
       const setPhotos = photosBySet[set.id] || [];
-      if (setPhotos.length === 0) return ''; // skip empty sets
       const size = set.size_class || 'medium';
       const layout = set.layout === 'portrait' ? 'portrait' : 'landscape';
 
@@ -170,9 +169,30 @@
           </div>
         </article>
       `;
-    }).filter(Boolean).join('');
+    }
 
-    container.innerHTML = `<div class="gallery-grid">${sectionsHtml}</div>`;
+    // Only sets that actually have photos
+    const renderable = sets.filter(s => (photosBySet[s.id] || []).length > 0);
+
+    // Pack sets into rows of 4 columns so they sit beside each other, then
+    // colour alternate rows with a full-width royal band (see .gallery-row CSS).
+    const SPAN = { small: 1, medium: 2, large: 3, full: 4 };
+    const COLS = 4;
+    const rows = [];
+    let cur = [], curSpan = 0;
+    renderable.forEach(set => {
+      const span = SPAN[set.size_class] || 2;
+      if (curSpan + span > COLS && cur.length) { rows.push(cur); cur = []; curSpan = 0; }
+      cur.push(set);
+      curSpan += span;
+    });
+    if (cur.length) rows.push(cur);
+
+    const rowsHtml = rows.map(row =>
+      `<div class="gallery-row">${row.map(buildSection).join('')}</div>`
+    ).join('');
+
+    container.innerHTML = `<div class="gallery-grid">${rowsHtml}</div>`;
 
     // Wire up carousel controls (per-section)
     container.querySelectorAll('.gallery-carousel').forEach(carousel => {
