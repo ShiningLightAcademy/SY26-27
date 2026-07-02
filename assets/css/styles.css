@@ -1340,43 +1340,36 @@ body.nav-open { overflow: hidden; }
 }
 
 /* ============================================================
-   GALLERY — grid of size-variant carousels
+   GALLERY — full-width stacked rows, alternating royal bands
    ============================================================ */
 .gallery-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1.75rem, 4vw, 3rem);
-  margin: clamp(2.5rem, 6vw, 4rem) 0 clamp(4rem, 9vw, 6rem);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: clamp(3.5rem, 8vw, 6rem);
 }
-/* Each set is a padded panel — room to breathe */
+/* Each set is a full-width row with generous vertical breathing room */
 .gallery-section {
   display: flex;
   flex-direction: column;
-  padding: clamp(1.4rem, 3vw, 2.25rem);
-  border-radius: var(--radius-xl);
-  background: var(--white);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.4s var(--ease-emphasis), box-shadow 0.4s var(--ease-emphasis);
+  align-items: center;
+  padding-block: clamp(3rem, 7vw, 5rem);
 }
-.gallery-section:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-/* Alternate panels: deep royal blue, like the home-page card shuffle */
+/* Alternate rows: a solid dark royal-blue band, edge to edge like the
+   home-page card shuffle. box-shadow paints the colour; clip-path keeps it
+   to a horizontal band (no vertical bleed) and adds no scrollbar. */
 .gallery-section:nth-child(even) {
-  background: linear-gradient(160deg, var(--royal-2), var(--royal) 72%);
-  border-color: transparent;
+  background: var(--royal);
   color: var(--paper);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 0 0 100vmax var(--royal);
+  clip-path: inset(0 -100vmax);
 }
 .gallery-section-head {
   text-align: center;
-  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+  margin-bottom: clamp(1.1rem, 2.5vw, 1.75rem);
 }
 .gallery-section-head h2 {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
   text-transform: none;
   letter-spacing: 0;
   line-height: 1.12;
@@ -1384,15 +1377,17 @@ body.nav-open { overflow: hidden; }
   color: var(--royal);
 }
 .gallery-section:nth-child(even) .gallery-section-head h2 { color: var(--paper); }
-.gallery-section-meta { font-size: 0.88rem; color: var(--text-mute); margin-top: 0.4rem; }
+.gallery-section-meta { font-size: 0.9rem; color: var(--text-mute); margin-top: 0.4rem; }
 .gallery-section:nth-child(even) .gallery-section-meta { color: var(--gold-lt); }
+/* Carousel is centred and width-limited within the row (varies by size class) */
 .gallery-carousel {
   position: relative;
+  width: 100%;
+  max-width: 780px;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--royal);
+  background: rgba(0, 16, 38, 0.25);
   box-shadow: var(--shadow-md);
-  flex: 1;
 }
 .gallery-carousel-track { position: relative; width: 100%; aspect-ratio: 4 / 3; }
 .gallery-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s var(--ease-emphasis); }
@@ -1424,18 +1419,15 @@ body.nav-open { overflow: hidden; }
 .gallery-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 0.3rem; z-index: 4; }
 .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(251,248,241,0.55); border: none; transition: all 0.3s var(--ease); }
 .gallery-dot.active { background: var(--gold-lt); width: 22px; border-radius: 999px; }
+/* Size classes now set the image width within the row, not grid spans */
 @media (min-width: 680px) {
-  .gallery-grid { grid-template-columns: repeat(4, 1fr); }
-  .gallery-section[data-size="small"] { grid-column: span 2; }
-  .gallery-section[data-size="medium"] { grid-column: span 2; }
-  .gallery-section[data-size="large"] { grid-column: span 3; }
-  .gallery-section[data-size="full"] { grid-column: span 4; }
+  .gallery-section[data-size="small"]  .gallery-carousel { max-width: 560px; }
+  .gallery-section[data-size="medium"] .gallery-carousel { max-width: 780px; }
+  .gallery-section[data-size="large"]  .gallery-carousel { max-width: 960px; }
+  .gallery-section[data-size="full"]   .gallery-carousel { max-width: 1120px; }
   .gallery-section[data-size="small"] .gallery-carousel-track { aspect-ratio: 1/1; }
   .gallery-section[data-size="large"] .gallery-carousel-track,
   .gallery-section[data-size="full"]  .gallery-carousel-track { aspect-ratio: 16/9; }
-}
-@media (min-width: 1024px) {
-  .gallery-section[data-size="small"] { grid-column: span 1; }
 }
 /* Portrait carousel layout — tall photos (e.g. phone shots). Placed after the
    size rules above so it overrides their aspect-ratio at equal specificity. */
