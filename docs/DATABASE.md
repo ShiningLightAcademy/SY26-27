@@ -32,8 +32,10 @@ read or write. Uploaded images go to a Supabase **Storage** bucket named `sla-me
 
 - Schema and seed scripts are run once in the Supabase **SQL Editor**; they are not part
   of the deployed site.
-- Incremental schema changes live in [`docs/migrations/`](migrations/). Run each `.sql`
-  file once in the SQL Editor. Newest: `2026-07-02_gallery_layout.sql` (adds the
-  `gallery_sets.layout` portrait/landscape option).
+- Incremental schema / data changes live in [`docs/migrations/`](migrations/). Run each
+  `.sql` file once in the SQL Editor. Recent:
+  - `2026-07-02_gallery_layout.sql` — adds the `gallery_sets.layout` portrait/landscape option.
+  - `2026-07-02_grade12_single.sql` — collapses Senior High to a single "Grade 12" in
+    `schedule_links` / `classroom_links` (renames STEM, removes HUMSS).
 - The editable-text keys (`site_content.key`) correspond to `data-content-key` attributes
   in the HTML and to the field list in `src/pages/admin.js` (Site text view).
