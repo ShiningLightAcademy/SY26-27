@@ -25,6 +25,9 @@ for (const file of htmlFiles) {
   while ((m = attrRe.exec(html)) !== null) {
     let ref = m[1].trim();
     if (!ref || skip.test(ref)) continue;
+    // Skip dynamic references built inside <script> template literals
+    // (e.g. src="${esc(t.photo_url)}") — these are runtime values, not files.
+    if (ref.includes('${')) continue;
     ref = ref.split('#')[0].split('?')[0];
     if (!ref) continue;
     checked++;

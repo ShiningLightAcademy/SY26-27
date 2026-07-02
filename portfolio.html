@@ -110,8 +110,7 @@
 
   const ORDER = ['Nursery','Kinder','Grade 1','Grade 2-3','Grade 4-6','Grade 7-10',
     'Grade 11',
-    'Grade 12 STEM (1st Sem)','Grade 12 STEM (2nd Sem)',
-    'Grade 12 HUMSS (1st Sem)','Grade 12 HUMSS (2nd Sem)'];
+    'Grade 12 STEM (1st Sem)','Grade 12 STEM (2nd Sem)'];
   function rank(g){ const i=ORDER.indexOf(g); if(i>=0) return i; if(/grade 11/i.test(g)) return 6.5; if(/grade 12/i.test(g)) return 11.5; return 999; }
 
   try {
