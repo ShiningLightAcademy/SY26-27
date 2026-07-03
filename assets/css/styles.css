@@ -1843,3 +1843,16 @@ body.nav-open { overflow: hidden; }
 .news-article-body { font-size: 1.1rem; line-height: 1.75; color: var(--text); }
 .news-article-body p { margin: 0 0 1.25rem; }
 .news-article-body p:last-child { margin-bottom: 0; }
+
+/* ============================================================
+   CONTACT PAGE — welcome poster (shown whole, never cropped)
+   ============================================================ */
+.contact-poster-section { padding: clamp(2rem, 5vw, 3rem) 0 0; }
+.contact-poster {
+  display: block;
+  width: 100%;
+  height: auto;            /* natural aspect ratio — the full image, no cuts */
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
