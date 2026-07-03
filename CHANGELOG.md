@@ -11,10 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   upload, summary, body, author, date, publish toggle). Each article has a
   "Copy link" button. Requires running `docs/migrations/2026-07-03_news.sql` once
   in the Supabase SQL Editor to create the `news_articles` table.
-- **Editable Award & Recognition links**: each of the five homepage award boxes now
-  has an editable link, managed from the admin's **Site Text** view
-  ("Homepage — Award & Recognition links"). Handy for pointing an award box at a
-  News article. Stored in `site_content`; hardcoded links remain as fallbacks.
+- **Awards & Recognition editor** (admin): a dedicated admin view to edit each of the
+  five homepage award boxes — title, description, and the link it opens — in one place,
+  with per-box Save and "Reset to original". Handy for pointing an award box at a News
+  article. Stored in `site_content`; the hardcoded text/links remain as fallbacks.
+  (Replaces the award fields that were previously scattered in the Site Text list.)
 - A **News** link in the main navigation and footer across the site.
 
 ### Changed
