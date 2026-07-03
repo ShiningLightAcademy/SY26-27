@@ -82,6 +82,7 @@
     if (name === 'messages')      return loadMessages();
     if (name === 'admins')        return loadAdmins();
     if (name === 'announcements') return loadAnnouncements();
+    if (name === 'news')          return loadNews();
     if (name === 'schedule')      return loadSchedule();
     if (name === 'classrooms')    return loadClassrooms();
     if (name === 'portfolio')     return loadPortfolio();
@@ -328,6 +329,13 @@
       { key: 'home.modalities_eyebrow',label: 'Modalities — eyebrow',   type: 'input',    def: 'Learning Modalities' },
       { key: 'home.numbers_eyebrow',   label: 'By the Numbers — eyebrow', type: 'input',  def: 'By the Numbers' },
     ]},
+    { group: 'Homepage — Award & Recognition links', note: 'Where each award box on the homepage links to. Paste a News article link (use “Copy link” in the News admin) or any web address.', fields: [
+      { key: 'home.award1_link', label: 'Award 1 — link (Best Performing Private School)', type: 'input', def: 'https://www.facebook.com/share/v/1Cnn5c9h2G/' },
+      { key: 'home.award2_link', label: 'Award 2 — link (World-Class Scholars)',          type: 'input', def: 'https://www.facebook.com/share/p/1BEbYP9RVB/' },
+      { key: 'home.award3_link', label: 'Award 3 — link (Champion Campus Journalists)',   type: 'input', def: 'https://www.manilatimes.net/2025/10/13/regions/cagayan-campus-journalists-feted-for-winning-medals-in-malaysia/2199185' },
+      { key: 'home.award4_link', label: 'Award 4 — link (Region 2 STARS Awardee)',        type: 'input', def: 'https://www.facebook.com/share/r/1EAh21mmjS/' },
+      { key: 'home.award5_link', label: 'Award 5 — link (Fifteen Years of Excellence)',   type: 'input', def: 'https://www.facebook.com/share/v/18j1nnk3T3/' },
+    ]},
     { group: 'Teachers page', fields: [
       { key: 'teachers.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Faculty & Staff' },
       { key: 'teachers.title',    label: 'Title',    type: 'input',    def: 'The Movers & Shakers.' },
@@ -385,6 +393,7 @@
     wrap.innerHTML = CONTENT_FIELDS.map(g => `
       <div class="site-text-group">
         <h3>${escapeHtml(g.group)}</h3>
+        ${g.note ? `<p class="admin-card-sub" style="margin:-0.4rem 0 0.9rem;">${escapeHtml(g.note)}</p>` : ''}
         ${g.fields.map(f => `
           <div class="site-text-field">
             <div class="site-text-label">
@@ -1520,6 +1529,229 @@
     statusEl.textContent = `✓ Uploaded ${uploaded} of ${list.length}.`;
     statusEl.className = 'admin-feedback success';
     loadHomeShuffle();
+  }
+
+
+  // ============================================================
+  // NEWS — Articles for the public News page
+  // ============================================================
+  const newsModal = document.getElementById('news-modal');
+  let newsCoverFile = null;   // pending File to upload on save
+  let newsCoverUrl = null;    // existing/uploaded public URL
+
+  function newsArticleUrl(id) {
+    const base = window.location.pathname.replace(/[^/]*$/, '');
+    return window.location.origin + base + 'news.html?id=' + id;
+  }
+
+  async function loadNews() {
+    const list = document.getElementById('news-list');
+    if (!list) return;
+    list.innerHTML = '<div class="admin-empty">Loading…</div>';
+    const { data, error } = await window.sla.db.from('news_articles')
+      .select('id, title, excerpt, cover_image_url, author, published_at, is_published')
+      .order('published_at', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (error) {
+      list.innerHTML = `<div class="admin-empty">Failed: ${escapeHtml(error.message)}. If this table doesn't exist yet, run docs/migrations/2026-07-03_news.sql in the Supabase SQL Editor, then refresh.</div>`;
+      return;
+    }
+    if (!data || !data.length) {
+      list.innerHTML = '<div class="admin-empty">No articles yet. Click “+ New article” to write the first one.</div>';
+      return;
+    }
+    list.innerHTML = data.map(a => {
+      const date = a.published_at ? new Date(a.published_at).toLocaleDateString() : '';
+      const meta = [date, a.author].filter(Boolean).join(' · ');
+      const thumb = a.cover_image_url
+        ? `<img class="news-admin-thumb" src="${escapeHtml(a.cover_image_url)}" alt="" />`
+        : `<div class="news-admin-thumb news-admin-thumb-empty">📰</div>`;
+      return `<div class="admin-list-item news-admin-item" data-id="${a.id}">
+        <div style="display:flex;align-items:center;gap:.85rem;min-width:0;">
+          ${thumb}
+          <div style="min-width:0;">
+            <strong>${escapeHtml(a.title)} ${a.is_published ? '' : '<span class="role-badge" style="background:#9CA3AF;margin-left:.3rem;">Draft</span>'}</strong>
+            <div class="meta">${escapeHtml(meta)}${a.excerpt ? ' — ' + escapeHtml(a.excerpt.slice(0, 80)) + (a.excerpt.length > 80 ? '…' : '') : ''}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-shrink:0;">
+          <button class="news-copy" data-id="${a.id}" style="padding:.4rem .8rem;font-size:.78rem;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:white;cursor:pointer;font-family:inherit;">Copy link</button>
+          <button class="news-edit" data-id="${a.id}" style="padding:.4rem .8rem;font-size:.78rem;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:white;cursor:pointer;font-family:inherit;">Edit</button>
+          <button class="news-del" data-id="${a.id}" style="padding:.4rem .8rem;font-size:.78rem;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:white;cursor:pointer;font-family:inherit;color:#DC2626;">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    list.querySelectorAll('.news-edit').forEach(btn =>
+      btn.addEventListener('click', e => { e.stopPropagation(); openNewsModal(btn.dataset.id); }));
+    list.querySelectorAll('.news-del').forEach(btn =>
+      btn.addEventListener('click', e => { e.stopPropagation(); deleteNews(btn.dataset.id); }));
+    list.querySelectorAll('.news-copy').forEach(btn =>
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const url = newsArticleUrl(btn.dataset.id);
+        try {
+          await navigator.clipboard.writeText(url);
+          const t = btn.textContent; btn.textContent = '✓ Copied';
+          setTimeout(() => { btn.textContent = t; }, 1500);
+        } catch (_) {
+          window.prompt('Copy this article link:', url);
+        }
+      }));
+    list.querySelectorAll('.news-admin-item').forEach(item =>
+      item.addEventListener('click', e => {
+        if (e.target.closest('button')) return;
+        openNewsModal(item.dataset.id);
+      }));
+  }
+
+  function resetNewsForm() {
+    ['news-id','news-title','news-author','news-excerpt','news-body'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const dateEl = document.getElementById('news-date');
+    if (dateEl) dateEl.value = new Date().toISOString().slice(0, 10); // default today
+    const pub = document.getElementById('news-published'); if (pub) pub.checked = true;
+    setNewsCoverPreview(null);
+    newsCoverFile = null; newsCoverUrl = null;
+    const fb = document.getElementById('news-form-feedback'); if (fb) { fb.textContent = ''; fb.className = 'admin-feedback'; }
+    const fileInput = document.getElementById('news-cover-input'); if (fileInput) fileInput.value = '';
+  }
+
+  function setNewsCoverPreview(src) {
+    const wrap = document.getElementById('news-cover-preview');
+    const img = document.getElementById('news-cover-img');
+    const hint = document.getElementById('news-cover-hint');
+    if (src) {
+      if (img) img.src = src;
+      if (wrap) wrap.style.display = 'flex';
+      if (hint) hint.textContent = 'Click or drop to replace the image';
+    } else {
+      if (img) img.src = '';
+      if (wrap) wrap.style.display = 'none';
+      if (hint) hint.textContent = 'Click or drop an image (max 5 MB)';
+    }
+  }
+
+  function openNewsModal(id) {
+    resetNewsForm();
+    document.getElementById('news-modal-title').textContent = id ? 'Edit article' : 'New article';
+    document.getElementById('news-delete-btn').style.display = id ? 'inline-flex' : 'none';
+    if (id) {
+      window.sla.db.from('news_articles').select('*').eq('id', id).single().then(({ data }) => {
+        if (!data) return;
+        document.getElementById('news-id').value = data.id;
+        document.getElementById('news-title').value = data.title || '';
+        document.getElementById('news-author').value = data.author || '';
+        document.getElementById('news-date').value = data.published_at ? new Date(data.published_at).toISOString().slice(0, 10) : '';
+        document.getElementById('news-excerpt').value = data.excerpt || '';
+        document.getElementById('news-body').value = data.body || '';
+        document.getElementById('news-published').checked = !!data.is_published;
+        if (data.cover_image_url) { newsCoverUrl = data.cover_image_url; setNewsCoverPreview(data.cover_image_url); }
+      });
+    }
+    newsModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeNewsModal() {
+    newsModal.hidden = true;
+    document.body.style.overflow = '';
+    resetNewsForm();
+  }
+
+  function handleNewsCoverFile(file) {
+    if (!file || !file.type.startsWith('image/')) { alert('Please use an image file.'); return; }
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); return; }
+    newsCoverFile = file; newsCoverUrl = null;
+    const reader = new FileReader();
+    reader.onload = e => setNewsCoverPreview(e.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  // Wire cover uploader + modal controls (elements exist once on the page)
+  if (newsModal) {
+    const coverDrop = document.getElementById('news-cover-drop');
+    const coverInput = document.getElementById('news-cover-input');
+    coverDrop.addEventListener('click', () => coverInput.click());
+    ['dragenter','dragover'].forEach(ev => coverDrop.addEventListener(ev, e => { e.preventDefault(); coverDrop.classList.add('dragging'); }));
+    ['dragleave','drop'].forEach(ev => coverDrop.addEventListener(ev, e => { e.preventDefault(); coverDrop.classList.remove('dragging'); }));
+    coverDrop.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleNewsCoverFile(e.dataTransfer.files[0]); });
+    coverInput.addEventListener('change', e => { if (e.target.files[0]) handleNewsCoverFile(e.target.files[0]); });
+    document.getElementById('news-cover-clear').addEventListener('click', () => {
+      newsCoverFile = null; newsCoverUrl = null; coverInput.value = ''; setNewsCoverPreview(null);
+    });
+
+    document.getElementById('news-modal-close').addEventListener('click', closeNewsModal);
+    document.getElementById('news-cancel-btn').addEventListener('click', closeNewsModal);
+    newsModal.addEventListener('click', e => { if (e.target === newsModal) closeNewsModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !newsModal.hidden) closeNewsModal(); });
+
+    document.getElementById('news-save-btn').addEventListener('click', saveNews);
+    document.getElementById('news-delete-btn').addEventListener('click', () => {
+      const id = document.getElementById('news-id').value;
+      if (id) deleteNews(id, true);
+    });
+  }
+
+  const newsAddBtn = document.getElementById('news-add-btn');
+  if (newsAddBtn) newsAddBtn.addEventListener('click', () => openNewsModal(null));
+
+  async function uploadNewsCover(file) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const safeExt = ['jpg','jpeg','png','webp','gif'].includes(ext) ? ext : 'jpg';
+    const path = `news/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${safeExt}`;
+    const { data, error } = await window.sla.db.storage.from('sla-media').upload(path, file, { cacheControl:'3600', upsert:false, contentType:file.type });
+    if (error) throw error;
+    const { data: urlData } = window.sla.db.storage.from('sla-media').getPublicUrl(data.path);
+    return urlData.publicUrl;
+  }
+
+  async function saveNews() {
+    const fb = document.getElementById('news-form-feedback');
+    fb.className = 'admin-feedback'; fb.textContent = '';
+    const title = document.getElementById('news-title').value.trim();
+    if (!title) { fb.classList.add('error'); fb.textContent = 'Title is required.'; return; }
+    const saveBtn = document.getElementById('news-save-btn');
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    try {
+      let coverUrl = newsCoverUrl;
+      if (newsCoverFile) coverUrl = await uploadNewsCover(newsCoverFile);
+      const payload = {
+        title,
+        author: document.getElementById('news-author').value.trim() || null,
+        published_at: document.getElementById('news-date').value || null,
+        excerpt: document.getElementById('news-excerpt').value.trim() || null,
+        body: document.getElementById('news-body').value.trim() || null,
+        cover_image_url: coverUrl || null,
+        is_published: document.getElementById('news-published').checked,
+        updated_at: new Date().toISOString(),
+      };
+      const id = document.getElementById('news-id').value;
+      const result = id
+        ? await window.sla.db.from('news_articles').update(payload).eq('id', id)
+        : await window.sla.db.from('news_articles').insert({ ...payload, created_by: profile.id });
+      if (result.error) throw result.error;
+      closeNewsModal(); loadNews();
+    } catch (e) {
+      fb.classList.add('error'); fb.textContent = 'Failed: ' + (e.message || e);
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = 'Save';
+    }
+  }
+
+  async function deleteNews(id, fromModal) {
+    if (!confirm('Delete this article? This cannot be undone.')) return;
+    try {
+      // Remove the cover image from storage if it lives in our bucket
+      const { data: art } = await window.sla.db.from('news_articles').select('cover_image_url').eq('id', id).single();
+      const url = art && art.cover_image_url;
+      if (url && url.includes('/storage/v1/object/public/sla-media/')) {
+        const path = url.split('/sla-media/').pop();
+        if (path) await window.sla.db.storage.from('sla-media').remove([path]).catch(() => {});
+      }
+      const { error } = await window.sla.db.from('news_articles').delete().eq('id', id);
+      if (error) throw error;
+      if (fromModal) closeNewsModal();
+      loadNews();
+    } catch (e) { alert('Failed: ' + (e.message || e)); }
   }
 
 

@@ -59,6 +59,9 @@
       <a href="#announcements" class="admin-nav-link" data-view="announcements">
         <span class="icon">📢</span> <span>Announcements</span>
       </a>
+      <a href="#news" class="admin-nav-link" data-view="news">
+        <span class="icon">📰</span> <span>News</span>
+      </a>
       <a href="#schedule" class="admin-nav-link" data-view="schedule">
         <span class="icon">📅</span> <span>Schedule</span>
       </a>
@@ -243,6 +246,25 @@
         <div id="ann-list" class="admin-list">
           <div class="admin-empty">Loading…</div>
         </div>
+      </div>
+    </section>
+
+    <section class="admin-view" data-view="news">
+      <header class="admin-view-head">
+        <h1>News</h1>
+        <p>Write news articles that appear on the public News page. Each article gets its own link you can paste into an Awards &amp; Recognition box on the homepage (Site Text → Award links).</p>
+      </header>
+
+      <div class="admin-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div>
+          <h3 style="margin-bottom: 0.2rem;">Articles</h3>
+          <p class="admin-card-sub" style="margin-bottom: 0;">Click an article to edit. Use “Copy link” to link an award box to it. Hidden (unpublished) articles don't appear publicly.</p>
+        </div>
+        <button id="news-add-btn" class="btn btn-primary">+ New article</button>
+      </div>
+
+      <div id="news-list" class="admin-list">
+        <div class="admin-empty">Loading…</div>
       </div>
     </section>
 
@@ -465,6 +487,66 @@
       <div style="flex: 1;"></div>
       <button id="teacher-cancel-btn" class="btn btn-ghost">Cancel</button>
       <button id="teacher-save-btn" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- News article edit modal -->
+<div id="news-modal" class="admin-modal" hidden>
+  <div class="admin-modal-content" style="max-width: 760px;">
+    <button class="admin-modal-close" id="news-modal-close" aria-label="Close">×</button>
+    <h2 id="news-modal-title" style="font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; margin-bottom: 0.4rem; letter-spacing: -0.015em;">New article</h2>
+    <p style="color: var(--text-mute); font-size: 0.88rem; margin-bottom: 1.5rem;">Only the title is required. Unpublished articles are saved but hidden from the public News page.</p>
+
+    <input type="hidden" id="news-id" />
+
+    <div class="teacher-form-fields">
+      <label>Title <span class="required">*</span>
+        <input type="text" id="news-title" placeholder="e.g. SLA named Best Performing Private School" />
+      </label>
+
+      <!-- Cover image (not a <label> — the dropzone opens the file dialog itself) -->
+      <div style="margin-top: 0.25rem; display: flex; flex-direction: column; gap: 0.3rem;">
+        <span style="font-size: 0.78rem; color: var(--text-mute); font-weight: 500; letter-spacing: 0.02em;">Cover image</span>
+        <div id="news-cover-drop" class="shuffle-dropzone">
+          <input type="file" id="news-cover-input" accept="image/*" hidden />
+          <span id="news-cover-hint">Click or drop an image (max 5 MB)</span>
+        </div>
+      </div>
+      <div id="news-cover-preview" class="news-cover-preview" style="display: none;">
+        <img id="news-cover-img" src="" alt="" />
+        <button type="button" id="news-cover-clear" class="btn btn-ghost" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">Remove cover</button>
+      </div>
+
+      <div class="form-row">
+        <label>Author (optional)
+          <input type="text" id="news-author" placeholder="e.g. SLA Communications" />
+        </label>
+        <label>Date
+          <input type="date" id="news-date" />
+        </label>
+      </div>
+
+      <label>Short summary (shown on the news list)
+        <textarea id="news-excerpt" rows="2" placeholder="One or two sentences that preview the article."></textarea>
+      </label>
+
+      <label>Article body
+        <textarea id="news-body" rows="10" placeholder="Write the full article here. Leave a blank line between paragraphs."></textarea>
+      </label>
+
+      <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem;">
+        <input type="checkbox" id="news-published" checked /> Published (visible on public News page)
+      </label>
+    </div>
+
+    <div id="news-form-feedback" class="admin-feedback"></div>
+
+    <div class="teacher-form-actions">
+      <button id="news-delete-btn" class="btn btn-ghost danger" style="display: none;">Delete</button>
+      <div style="flex: 1;"></div>
+      <button id="news-cancel-btn" class="btn btn-ghost">Cancel</button>
+      <button id="news-save-btn" class="btn btn-primary">Save</button>
     </div>
   </div>
 </div>

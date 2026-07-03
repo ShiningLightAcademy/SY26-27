@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>News — Shining Light Academy</title>
+<link rel="stylesheet" href="assets/css/styles.css" />
+<link rel="icon" type="image/svg+xml" href="assets/images/sla-logo.svg" />
+<!-- Auth (must load before page content) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="src/core/supabase-client.js"></script>
+<script src="src/core/auth-guard.js"></script>
+<script src="src/features/edit-mode.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-brand">
+      <img src="assets/images/sla-logo.svg" alt="" />
+      <span>Shining Light Academy</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teachers.html">Movers & Shakers</a></li>
+      <li><a href="schedule.html">Schedule</a></li>
+      <li><a href="classrooms.html">Classrooms</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="news.html" class="active">News</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="page-hero news-hero">
+  <div class="container">
+    <span class="t-eyebrow" data-content-key="news.eyebrow">News &amp; Updates</span>
+    <h1 class="page-hero-title" data-content-key="news.title">What's happening at SLA.</h1>
+    <p class="page-hero-sub" data-content-key="news.subtitle">Awards, achievements, events, and stories from our community.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div id="news-content">
+    <div style="padding: 4rem 2rem; text-align: center; color: var(--text-mute); font-style: italic;">Loading news…</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top" data-content-key="footer.intro">
+      Shining Light Academy is a private Christian school serving Cagayan Valley since 2011. Information on this site is for the SLA community.
+    </div>
+    <div class="footer-grid">
+      <div>
+        <h5 data-content-key="footer.head_school">School</h5>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="teachers.html">Movers & Shakers</a></li>
+          <li><a href="news.html">News</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 data-content-key="footer.head_academics">Academics</h5>
+        <ul>
+          <li><a href="schedule.html">Schedule</a></li>
+          <li><a href="classrooms.html">Classrooms</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 data-content-key="footer.head_connect">Connect</h5>
+        <ul>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mailto:sla@slasm.net">sla@slasm.net</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Copyright © <span id="current-year"></span> Shining Light Academy. All rights reserved.</span>
+      <span class="rjmo-credit">RJMO28</span>
+    </div>
+  </div>
+</footer>
+
+<script src="src/app/main.js"></script>
+
+<script>
+(async () => {
+  if (!window.sla) return;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch { return ''; }
+  }
+  // Render article body: split on blank lines into paragraphs, escape each.
+  function renderBody(text) {
+    if (!text) return '';
+    return String(text)
+      .split(/\n{2,}/)
+      .map(p => p.trim())
+      .filter(Boolean)
+      .map(p => `<p>${esc(p).replace(/\n/g, '<br />')}</p>`)
+      .join('');
+  }
+
+  const container = document.getElementById('news-content');
+  const params = new URLSearchParams(location.search);
+  const articleId = params.get('id');
+
+  try {
+    if (articleId) {
+      // ---- SINGLE ARTICLE VIEW ----
+      const { data: a, error } = await window.sla.db
+        .from('news_articles')
+        .select('*')
+        .eq('id', articleId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!a) {
+        container.innerHTML = `
+          <div style="padding: 4rem 2rem; text-align: center; color: var(--text-mute);">
+            <p style="font-style: italic;">This article could not be found.</p>
+            <p style="margin-top: 1rem;"><a href="news.html" class="news-back">← Back to all news</a></p>
+          </div>`;
+        return;
+      }
+      document.title = a.title + ' — Shining Light Academy';
+      const meta = [fmtDate(a.published_at), a.author].filter(Boolean).join(' · ');
+      container.innerHTML = `
+        <article class="news-article">
+          <a href="news.html" class="news-back">← All news</a>
+          <h1 class="news-article-title">${esc(a.title)}</h1>
+          ${meta ? `<p class="news-article-meta">${esc(meta)}</p>` : ''}
+          ${a.cover_image_url ? `<img class="news-article-cover" src="${esc(a.cover_image_url)}" alt="${esc(a.title)}" />` : ''}
+          <div class="news-article-body">${renderBody(a.body)}</div>
+        </article>`;
+      return;
+    }
+
+    // ---- LIST VIEW ----
+    const { data: articles, error } = await window.sla.db
+      .from('news_articles')
+      .select('id, title, excerpt, cover_image_url, author, published_at')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .order('created_at', { ascending: false });
+    // If the news table isn't set up yet (or any read error), degrade gracefully
+    // to the neutral empty state rather than showing a scary error to visitors.
+    if (error) {
+      console.warn('[news] list query failed:', error);
+      container.innerHTML = '<div style="padding: 4rem 2rem; text-align: center; color: var(--text-mute); font-style: italic;">No news yet. Check back soon.</div>';
+      return;
+    }
+
+    if (!articles || articles.length === 0) {
+      container.innerHTML = '<div style="padding: 4rem 2rem; text-align: center; color: var(--text-mute); font-style: italic;">No news yet. Check back soon.</div>';
+      return;
+    }
+
+    container.innerHTML = `<div class="news-grid">${articles.map(a => {
+      const meta = [fmtDate(a.published_at), a.author].filter(Boolean).join(' · ');
+      const thumb = a.cover_image_url
+        ? `<div class="news-card-thumb"><img src="${esc(a.cover_image_url)}" alt="${esc(a.title)}" loading="lazy" /></div>`
+        : `<div class="news-card-thumb news-card-thumb-empty" aria-hidden="true">📰</div>`;
+      return `
+        <a class="news-card" href="news.html?id=${esc(a.id)}">
+          ${thumb}
+          <div class="news-card-body">
+            ${meta ? `<span class="news-card-meta">${esc(meta)}</span>` : ''}
+            <h2 class="news-card-title">${esc(a.title)}</h2>
+            ${a.excerpt ? `<p class="news-card-excerpt">${esc(a.excerpt)}</p>` : ''}
+            <span class="news-card-more">Read more →</span>
+          </div>
+        </a>`;
+    }).join('')}</div>`;
+  } catch (e) {
+    console.error('[news]', e);
+    container.innerHTML = `<div style="padding: 4rem 2rem; text-align: center; color: #DC2626;">Could not load news: ${esc(e.message)}</div>`;
+  }
+})();
+
+// Footer year
+document.getElementById('current-year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>

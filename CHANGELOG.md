@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **News page** (`news.html`): a public article list and single-article view, plus a
+  **News** section in the admin panel to create/edit/delete articles (cover image
+  upload, summary, body, author, date, publish toggle). Each article has a
+  "Copy link" button. Requires running `docs/migrations/2026-07-03_news.sql` once
+  in the Supabase SQL Editor to create the `news_articles` table.
+- **Editable Award & Recognition links**: each of the five homepage award boxes now
+  has an editable link, managed from the admin's **Site Text** view
+  ("Homepage — Award & Recognition links"). Handy for pointing an award box at a
+  News article. Stored in `site_content`; hardcoded links remain as fallbacks.
+- A **News** link in the main navigation and footer across the site.
+
 ### Changed
 - Restructured the repository into an enterprise-style layout: source code under
   `src/` (`core/`, `app/`, `features/`, `pages/`), static assets under `assets/`

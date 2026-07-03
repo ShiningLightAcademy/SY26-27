@@ -15,6 +15,7 @@ read or write. Uploaded images go to a Supabase **Storage** bucket named `sla-me
 | `classroom_links` | Per-grade Google Classroom URL, grouped by `level_group`. |
 | `portfolio_subjects` | Per-grade subject `subject_name` + `color_hex` + `color_label`. |
 | `announcements` | `title`, `body`, optional `link_text`/`link_url`, `is_active`. |
+| `news_articles` | Public News page articles: `title`, `excerpt`, `body`, `cover_image_url`, `author`, `published_at`, `is_published`. Read = published (admins read drafts too); write = admins. |
 | `home_shuffle_images` | Homepage rotating cards: `image_url`, `caption`, `alt_text`, `is_visible`, `sort_order`. |
 | `site_content` | Key/value overrides for editable site text (`key`, `value`, `updated_by`). |
 | `site_settings` | Global flags such as `public_visible` (maintenance mode). |
@@ -37,5 +38,6 @@ read or write. Uploaded images go to a Supabase **Storage** bucket named `sla-me
   - `2026-07-02_gallery_layout.sql` — adds the `gallery_sets.layout` portrait/landscape option.
   - `2026-07-02_grade12_single.sql` — collapses Senior High to a single "Grade 12" in
     `schedule_links` / `classroom_links` (renames STEM, removes HUMSS).
+  - `2026-07-03_news.sql` — creates the `news_articles` table (+ RLS) for the News page.
 - The editable-text keys (`site_content.key`) correspond to `data-content-key` attributes
   in the HTML and to the field list in `src/pages/admin.js` (Site text view).

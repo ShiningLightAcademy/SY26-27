@@ -177,15 +177,22 @@
   // so nothing ever breaks and customizing is fully optional.
   async function applySiteContent() {
     const nodes = document.querySelectorAll('[data-content-key]');
-    if (!nodes.length) return; // zero-cost on pages with no editable text
+    const linkNodes = document.querySelectorAll('[data-link-key]');
+    if (!nodes.length && !linkNodes.length) return; // zero-cost on pages with nothing editable
     try {
       const { data, error } = await client.from('site_content').select('key,value');
       if (error || !data) return;
       const map = {};
       data.forEach(r => { map[r.key] = r.value; });
+      // Editable text
       nodes.forEach(el => {
         const v = map[el.getAttribute('data-content-key')];
         if (typeof v === 'string' && v.trim() !== '') el.textContent = v;
+      });
+      // Editable links (e.g. homepage Award & Recognition boxes) — override href.
+      linkNodes.forEach(el => {
+        const v = map[el.getAttribute('data-link-key')];
+        if (typeof v === 'string' && v.trim() !== '') el.setAttribute('href', v);
       });
     } catch (_) {}
   }
