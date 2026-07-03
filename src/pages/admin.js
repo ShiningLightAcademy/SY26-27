@@ -341,6 +341,9 @@
       { key: 'portfolio.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Portfolio Color Codes' },
       { key: 'portfolio.title',    label: 'Title',    type: 'input',    def: 'Subject color codes.' },
       { key: 'portfolio.subtitle', label: 'Description', type: 'textarea', def: 'Find your grade level below. Tap to see all subjects with their assigned color codes. Use these to organize your folders, notebooks, and submissions consistently across all subjects.' },
+      { key: 'portfolio.cover_eyebrow', label: 'Cover sample — eyebrow',     type: 'input',    def: 'Portfolio Cover' },
+      { key: 'portfolio.cover_title',   label: 'Cover sample — title',       type: 'input',    def: 'Sample portfolio cover.' },
+      { key: 'portfolio.cover_desc',    label: 'Cover sample — description',  type: 'textarea', def: "Every subject portfolio should begin with a cover page like this one — the SLA crest, the school year, the subject and grade level, and the student's and subject teacher's names. Follow this layout so all portfolios stay neat and consistent." },
     ]},
     { group: 'Gallery page', fields: [
       { key: 'gallery.eyebrow',  label: 'Eyebrow',  type: 'input',    def: 'Gallery' },

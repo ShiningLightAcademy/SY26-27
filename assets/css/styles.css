@@ -1856,3 +1856,41 @@ body.nav-open { overflow: hidden; }
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
+
+/* ============================================================
+   PORTFOLIO PAGE — sample cover section
+   ============================================================ */
+.portfolio-cover-section { padding-top: clamp(2rem, 5vw, 3.5rem); }
+.portfolio-cover-wrap {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 360px);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+.portfolio-cover-text h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  line-height: 1.15;
+  margin: 0.4rem 0 1rem;
+  color: var(--royal-ink);
+}
+.portfolio-cover-text p {
+  color: var(--text-mute);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 48ch;
+  margin: 0;
+}
+.portfolio-cover-figure { margin: 0; }
+.portfolio-cover-figure img {
+  display: block;
+  width: 100%;
+  height: auto;              /* full cover, never cropped */
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgba(0, 32, 74, 0.12);
+}
+@media (max-width: 720px) {
+  .portfolio-cover-wrap { grid-template-columns: 1fr; }
+  .portfolio-cover-figure { max-width: 340px; margin: 0 auto; }
+}
