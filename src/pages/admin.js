@@ -188,7 +188,7 @@
 
       const queries = [
         // Always fetch for all admins:
-        window.sla.db.from('contact_messages').select('id', { count:'exact', head:true }).eq('is_read', false),
+        window.sla.db.from('contact_messages').select('id', { count:'exact', head:true }).eq('is_read', false).eq('is_archived', false),
         window.sla.db.from('teachers').select('id', { count:'exact', head:true }),
         window.sla.db.from('announcements').select('id', { count:'exact', head:true }).eq('is_active', true),
       ];
@@ -458,12 +458,23 @@
   // ============================================================
   // MESSAGES
   // ============================================================
+  let messagesFilter = 'active'; // 'active' | 'archived'
+  document.querySelectorAll('.msg-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.filter === messagesFilter) return;
+      messagesFilter = btn.dataset.filter;
+      document.querySelectorAll('.msg-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+      loadMessages();
+    });
+  });
+
   async function loadMessages() {
     const list = document.getElementById('messages-list');
+    const showArchived = messagesFilter === 'archived';
     list.innerHTML = '<div class="admin-empty">Loading messages…</div>';
-    const { data, error } = await window.sla.db.from('contact_messages').select('*').order('received_at', { ascending:false }).limit(100);
+    const { data, error } = await window.sla.db.from('contact_messages').select('*').eq('is_archived', showArchived).order('received_at', { ascending:false }).limit(100);
     if (error) { list.innerHTML = `<div class="admin-empty">Failed: ${escapeHtml(error.message)}</div>`; return; }
-    if (!data || !data.length) { list.innerHTML = '<div class="admin-empty">No messages yet.</div>'; return; }
+    if (!data || !data.length) { list.innerHTML = `<div class="admin-empty">${showArchived ? 'No archived messages.' : 'No messages yet.'}</div>`; return; }
     list.innerHTML = data.map(m => {
       const name = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email || 'Anonymous';
       return `<div class="admin-list-item ${m.is_read ? '' : 'unread'}" data-id="${m.id}">
@@ -478,6 +489,7 @@
     if (!m) return;
     if (!m.is_read) await window.sla.db.from('contact_messages').update({ is_read: true }).eq('id', id);
     const name = `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'Anonymous';
+    const archived = !!m.is_archived;
     const modal = document.createElement('div');
     modal.className = 'admin-modal';
     modal.innerHTML = `<div class="admin-modal-content">
@@ -486,13 +498,31 @@
         <div class="from-info"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(m.email || 'no email')} · ${new Date(m.received_at).toLocaleString()}</span></div>
         <div class="subject">${escapeHtml(m.subject || '(no subject)')}</div>
         <div class="body">${escapeHtml(m.message || '')}</div>
-        ${m.email ? `<a href="mailto:${encodeURIComponent(m.email)}?subject=Re: ${encodeURIComponent(m.subject || '')}" class="btn btn-primary" style="margin-top:1.5rem;display:inline-flex;">Reply via email</a>` : ''}
+        <div class="message-actions">
+          ${m.email ? `<a href="mailto:${encodeURIComponent(m.email)}?subject=Re: ${encodeURIComponent(m.subject || '')}" class="btn btn-primary">Reply via email</a>` : ''}
+          <button class="btn btn-ghost" data-msg-archive>${archived ? 'Unarchive' : 'Archive'}</button>
+          <button class="btn btn-ghost danger" data-msg-delete>Delete</button>
+        </div>
       </div>
     </div>`;
     document.body.appendChild(modal);
-    modal.querySelector('.admin-modal-close').addEventListener('click', () => modal.remove());
-    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-    document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', esc); } });
+    const close = () => modal.remove();
+    modal.querySelector('.admin-modal-close').addEventListener('click', close);
+    modal.addEventListener('click', e => { if (e.target === modal) close(); });
+    document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
+
+    modal.querySelector('[data-msg-archive]').addEventListener('click', async () => {
+      const { error } = await window.sla.db.from('contact_messages').update({ is_archived: !archived }).eq('id', id);
+      if (error) { alert('Failed: ' + error.message); return; }
+      close(); loadMessages(); loadDashboard();
+    });
+    modal.querySelector('[data-msg-delete]').addEventListener('click', async () => {
+      if (!confirm('Permanently delete this message? This cannot be undone.')) return;
+      const { error } = await window.sla.db.from('contact_messages').delete().eq('id', id);
+      if (error) { alert('Failed: ' + error.message); return; }
+      close(); loadMessages(); loadDashboard();
+    });
+
     loadMessages(); loadDashboard();
   }
 
